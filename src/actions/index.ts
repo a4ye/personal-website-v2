@@ -1,6 +1,7 @@
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro/zod";
 import { insertGuestbookEntry } from "@/lib/sqlc/guestbook_sql.ts";
+import { incrementVisitsCount } from "@/lib/sqlc/counters_sql.ts";
 import { db } from "@/lib/database.ts";
 import { checkRateLimit } from "@/lib/rate-limit.ts";
 import sanitizeHtml from "sanitize-html";
@@ -22,6 +23,20 @@ function sanitize(input: string): string {
 }
 
 export const server = {
+    incrementVisits: defineAction({
+        accept: "json",
+        input: z.object({}),
+        async handler() {
+            const result = await incrementVisitsCount(db);
+            if (!result) {
+                throw new ActionError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to increment visits count",
+                });
+            }
+            return { countValue: result.countValue };
+        },
+    }),
     submitGuestbookEntry: defineAction({
         accept: "form",
         input: z.object({
