@@ -25,9 +25,7 @@ import VisitsCounterTooltip from "./VisitsCounterTooltip";
     if (import.meta.env.PUBLIC_ENV !== "DEV") {
         window.addEventListener("DOMContentLoaded", async () => {
             try {
-                const visitsCounterResponse = await fetch("/api/increment-visits-count", {
-                    method: "POST",
-                });
+                const visitsCounterResponse = await fetch("/api/increment-visits-count");
                 const visitsCounterData: { countValue: string | null } =
                     await visitsCounterResponse.json();
                 document.getElementById("visits-count")!.textContent =
