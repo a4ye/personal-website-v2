@@ -13,6 +13,7 @@ import vercel from "@astrojs/vercel";
 import react from "@astrojs/react";
 
 export default defineConfig({
+    site: "https://aaronye.dev", // Required for CSRF protection on actions
     vite: {
         plugins: [
             visualizer({
