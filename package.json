@@ -14,7 +14,7 @@
         "@astrojs/react": "^4.4.2",
         "@astrojs/svelte": "^7.2.5",
         "@astrojs/vercel": "^9.0.4",
-        "@fontsource/instrument-sans": "^5.2.8",
+        "@fontsource/figtree": "^5.2.10",
         "@radix-ui/react-tooltip": "^1.2.8",
         "@tailwindcss/vite": "^4.0.17",
         "@types/react": "^19.2.7",
