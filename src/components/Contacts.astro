@@ -1,61 +1,72 @@
 ---
 import { Icon } from "astro-icon/components";
+import IconTooltip from "./IconTooltip";
 ---
 
 <div class="flex sm:justify-end gap-4">
-    <a
-        aria-label="Github"
-        href="https://github.com/a4ye/"
-        target="_blank"
-        rel="noreferrer noopener"
-    >
-        <Icon
-            name="lucide--github"
-            class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
-        />
-    </a>
-    <a
-        aria-label="LinkedIn"
-        href="https://www.linkedin.com/in/aaron--ye"
-        target="_blank"
-        rel="noreferrer noopener"
-    >
-        <Icon
-            name="lucide--linkedin"
-            class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
-        />
-    </a>
-    <a
-        aria-label="X"
-        href="https://x.com/aaronye1001"
-        target="_blank"
-        rel="noreferrer noopener"
-    >
-        <Icon
-            name="ri--twitter-x-line"
-            class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
-        />
-    </a>
-    <a
-        aria-label="Email"
-        href="mailto:aaronye1001@gmail.com"
-        target="_blank"
-        rel="noreferrer noopener"
-    >
-        <Icon
-            name="lucide--mail"
-            class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
-        />
-    </a>
-    <a
-        aria-label="Resume"
-        href="/resume"
-        target="_blank"
-        rel="noreferrer noopener"
-    >
-        <Icon
-            name="lucide--file-text"
-            class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
-        />
-    </a>
+    <IconTooltip label="GitHub" client:idle>
+        <a
+            aria-label="Github"
+            href="https://github.com/a4ye/"
+            target="_blank"
+            rel="noreferrer noopener"
+        >
+            <Icon
+                name="lucide--github"
+                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+            />
+        </a>
+    </IconTooltip>
+    <IconTooltip label="LinkedIn" client:idle>
+        <a
+            aria-label="LinkedIn"
+            href="https://www.linkedin.com/in/aaron--ye"
+            target="_blank"
+            rel="noreferrer noopener"
+        >
+            <Icon
+                name="lucide--linkedin"
+                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+            />
+        </a>
+    </IconTooltip>
+    <IconTooltip label="X" client:idle>
+        <a
+            aria-label="X"
+            href="https://x.com/aaronye1001"
+            target="_blank"
+            rel="noreferrer noopener"
+        >
+            <Icon
+                name="ri--twitter-x-line"
+                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+            />
+        </a>
+    </IconTooltip>
+    <IconTooltip label="Email" client:idle>
+        <a
+            aria-label="Email"
+            href="mailto:aaronye1001@gmail.com"
+            target="_blank"
+            rel="noreferrer noopener"
+        >
+            <Icon
+                name="lucide--mail"
+                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+            />
+        </a>
+    </IconTooltip>
+    <IconTooltip label="Resume" client:idle>
+        <a
+            aria-label="Resume"
+            href="/resume"
+            target="_blank"
+            rel="noreferrer noopener"
+        >
+            <Icon
+                name="lucide--file-text"
+                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+            />
+        </a>
+    </IconTooltip>
 </div>
