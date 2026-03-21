@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import button from "../assets/button/button.gif";
 import { Image } from "astro:assets";
+import ottoLabsLogo from "../assets/logos/ottolabs.png"
 import uwaterlooLogo from "../assets/logos/uwaterloo.svg";
 import eurekahacksLogo from "../assets/logos/eurekahacks2025.svg";
 import counterspell from "../assets/logos/counterspell.png";
@@ -16,6 +17,29 @@ import HackathonList from "./HackathonList.astro";
 
 <h1 class="pt-8 font-bold text-lg md:text-xl">Currently:</h1>
 <ul class="list-none mt-3 space-y-2">
+  <li class="flex items-start gap-3 pl-0 sm:pl-2">
+    <Icon
+            name="iconamoon--arrow-right-2-bold"
+            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
+            aria-hidden="true"
+    />
+    <span class="flex items-center text-sm md:text-base"
+    >Incoming Software Engineering Intern @ <span class="inline-block">
+                <Image
+                        src={ottoLabsLogo}
+                        alt="Otto Labs Logo"
+                        loading="eager"
+                        class="h-4 w-4 ml-1 mr-1"
+                />
+            </span><a
+            href="https://ottosr.com/"
+            class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
+            target="_blank"
+            rel="noopener noreferrer"
+    >Otto Labs
+            </a></span
+    >
+  </li>
     <li class="flex items-start gap-3 pl-0 sm:pl-2">
         <Icon
             name="iconamoon--arrow-right-2-bold"
@@ -47,16 +71,6 @@ import HackathonList from "./HackathonList.astro";
         />
         <span class="text-sm md:text-base"
             >Learning about machine learning, AI, and systems programming</span
-        >
-    </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="text-sm md:text-base"
-            >Seeking Summer 2026 software engineering internships</span
         >
     </li>
 </ul>
