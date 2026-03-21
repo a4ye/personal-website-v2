@@ -1,8 +1,8 @@
 ---
 import GithubCommit from "../components/GithubCommit.astro";
 import VisitsCounter from "./VisitsCounter.astro";
-import SnowToggle from "./SnowToggle.svelte";
-// import SpringToggle from "./SpringToggle.svelte";
+// import SnowToggle from "./SnowToggle.svelte";
+import SpringToggle from "./SpringToggle.svelte";
 // import RainToggle from "./RainToggle.svelte";
 const currentYear = new Date().getFullYear();
 ---
@@ -14,8 +14,8 @@ const currentYear = new Date().getFullYear();
             <span>© {currentYear} Aaron Ye</span>
         </div>
         <div class="flex items-center gap-4 sm:gap-6">
-            <SnowToggle client:idle />
-            <!-- <SpringToggle client:idle /> -->
+            <!-- <SnowToggle client:idle /> -->
+            <SpringToggle client:idle />
             <!-- <RainToggle client:idle /> -->
             <GithubCommit />
             <VisitsCounter />

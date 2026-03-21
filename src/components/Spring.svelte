@@ -40,7 +40,7 @@
 
     const layers: PetalLayer[] = [
         {
-            baseCount: 25,
+            baseCount: 20,
             count: 40,
             minSize: 14,
             maxSize: 22,
@@ -52,7 +52,7 @@
             alpha: 0.4,
         },
         {
-            baseCount: 20,
+            baseCount: 15,
             count: 30,
             minSize: 18,
             maxSize: 26,
@@ -64,7 +64,7 @@
             alpha: 0.6,
         },
         {
-            baseCount: 10,
+            baseCount: 8,
             count: 20,
             minSize: 26,
             maxSize: 32,

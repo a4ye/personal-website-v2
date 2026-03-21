@@ -2,8 +2,8 @@
 import "../styles/global.css";
 import "@fontsource/figtree";
 import Footer from "../components/Footer.astro";
-import Snow from "../components/Snow.svelte";
-// import Spring from "../components/Spring.svelte";
+// import Snow from "../components/Snow.svelte";
+import Spring from "../components/Spring.svelte";
 // import Rain from "../components/Rain.svelte";
 import TitleSection from "../components/TitleSection.astro";
 
@@ -31,8 +31,8 @@ const env = import.meta.env.PUBLIC_ENV as string;
     <body class="bg-ctp-base text-ctp-text mocha">
         <div class="flex flex-col justify-between min-h-screen">
             <div>
-                <Snow client:only="svelte" />
-                <!-- <Spring client:only="svelte" /> -->
+                <!-- <Snow client:only="svelte" /> -->
+                <Spring client:only="svelte" />
                 <!-- <Rain client:only="svelte" /> -->
                 <div class="px-6 sm:px-12 md:px-24 lg:px-36 flex justify-center">
                     <div class="w-full max-w-3xl">
