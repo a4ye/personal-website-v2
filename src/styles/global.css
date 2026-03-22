@@ -8,6 +8,34 @@
     background: var(--catppuccin-color-base);
 }
 
+.mocha {
+    color-scheme: dark;
+}
+
+.latte {
+    color-scheme: light;
+    --catppuccin-color-mauve: #7287fd;
+    --catppuccin-color-mauve-500: #7287fd;
+    --catppuccin-color-mauve-400: #8696fc;
+    --catppuccin-color-mauve-300: #97a4fb;
+    --catppuccin-color-mauve-200: #a5b0fb;
+    --catppuccin-color-mauve-100: #b2bbfa;
+    --catppuccin-color-mauve-50: #bec5f9;
+    --catppuccin-color-mauve-600: #6d81f2;
+    --catppuccin-color-mauve-700: #6476df;
+    --catppuccin-color-mauve-800: #596aca;
+    --catppuccin-color-mauve-900: #4e5db1;
+    --catppuccin-color-mauve-950: #3f4c94;
+}
+
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease,
+        fill 0.3s ease, stroke 0.3s ease !important;
+}
+
 html,
 body {
     font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;

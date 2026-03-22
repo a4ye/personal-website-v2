@@ -4,6 +4,8 @@ import VisitsCounter from "./VisitsCounter.astro";
 // import SnowToggle from "./SnowToggle.svelte";
 import SpringToggle from "./SpringToggle.svelte";
 // import RainToggle from "./RainToggle.svelte";
+import ThemeToggle from "./ThemeToggle.svelte";
+import IconTooltip from "./IconTooltip";
 const currentYear = new Date().getFullYear();
 ---
 
@@ -13,12 +15,22 @@ const currentYear = new Date().getFullYear();
         <div>
             <span>© {currentYear} Aaron Ye</span>
         </div>
-        <div class="flex items-center gap-4 sm:gap-6">
-            <!-- <SnowToggle client:idle /> -->
-            <SpringToggle client:idle />
-            <!-- <RainToggle client:idle /> -->
-            <GithubCommit />
-            <VisitsCounter />
+        <div class="flex items-center gap-3 sm:gap-4">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <IconTooltip label="Toggle theme" client:idle>
+                    <ThemeToggle client:idle />
+                </IconTooltip>
+                <!-- <SnowToggle client:idle /> -->
+                <IconTooltip label="Toggle petals" client:idle>
+                    <SpringToggle client:idle />
+                </IconTooltip>
+                <!-- <RainToggle client:idle /> -->
+            </div>
+            <span class="hidden sm:inline text-ctp-surface0">|</span>
+            <div class="flex items-center gap-3 sm:gap-5">
+                <GithubCommit />
+                <VisitsCounter />
+            </div>
         </div>
     </div>
 </footer>

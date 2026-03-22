@@ -18,6 +18,13 @@ const env = import.meta.env.PUBLIC_ENV as string;
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="generator" content={Astro.generator} />
         <title>Aaron Ye</title>
+        <script is:inline>
+            (function () {
+                var theme = localStorage.getItem("theme");
+                if (theme !== "latte" && theme !== "mocha") theme = "mocha";
+                document.documentElement.className = theme;
+            })();
+        </script>
         {
             env === "PROD" && (
                 <script
@@ -28,7 +35,7 @@ const env = import.meta.env.PUBLIC_ENV as string;
             )
         }
     </head>
-    <body class="bg-ctp-base text-ctp-text mocha">
+    <body class="bg-ctp-base text-ctp-text">
         <div class="flex flex-col justify-between min-h-screen">
             <div>
                 <!-- <Snow client:only="svelte" /> -->
