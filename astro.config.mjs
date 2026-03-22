@@ -14,6 +14,7 @@ import react from "@astrojs/react";
 
 export default defineConfig({
     site: "https://aaronye.dev",
+    prefetch: true,
     security: {
         checkOrigin: false, // Handled by custom middleware (src/middleware.ts)
     },

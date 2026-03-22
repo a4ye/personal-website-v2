@@ -19,7 +19,7 @@ const currentPath = Astro.url.pathname;
         </div>
     </div>
     <nav class="flex flex-col gap-1.5 sm:gap-3 pb-1 sm:pb-3">
-        <NavLinks currentPath={currentPath} client:load />
+        <NavLinks currentPath={currentPath} client:idle />
         <div class="hidden sm:block">
             <Contacts />
         </div>

@@ -206,12 +206,18 @@
 
     let initialized = false;
 
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+    function debouncedResize() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(resizeCanvas, 100);
+    }
+
     function startSpring() {
         if (initialized || !canvas) return;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
         context = canvas.getContext("2d")!;
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("resize", debouncedResize);
 
         petalImg = new Image();
         petalImg.src = petalSvg.src;
@@ -228,7 +234,8 @@
             window.cancelAnimationFrame(animationFrameId);
             animationFrameId = 0;
         }
-        window.removeEventListener("resize", resizeCanvas);
+        window.removeEventListener("resize", debouncedResize);
+        clearTimeout(resizeTimeout);
         initialized = false;
     }
 
