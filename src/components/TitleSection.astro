@@ -4,25 +4,21 @@ import Contacts from "./Contacts.astro";
 const currentPath = Astro.url.pathname;
 ---
 
-<div
-    class="pt-12 flex flex-col gap-2 sm:gap-0 items-start pb-2 sm:pb-0 sm:flex-row justify-between sm:items-end"
->
-    <div class="flex justify-between items-end w-full">
-        <div>
-            <a href="/" class="text-2xl md:text-3xl lg:text-4xl font-bold text-ctp-mauve"
-                >Aaron Ye</a
-            >
-            <h2 class="sm:pt-2 pb-2 text-base md:text-lg">Mathematics @ UWaterloo</h2>
-        </div>
-        <div class="sm:hidden pb-2.5">
-            <Contacts />
-        </div>
+<div class="pt-12 pb-2 flex flex-col gap-2 sm:gap-0">
+    <div class="flex flex-col items-center gap-1 sm:hidden">
+        <a href="/" class="text-2xl font-bold text-ctp-mauve">Aaron Ye</a>
+        <Contacts />
+        <nav class="pt-1">
+            <NavLinks currentPath={currentPath} client:idle />
+        </nav>
     </div>
-    <nav class="flex flex-col gap-1.5 sm:gap-3 pb-1 sm:pb-3">
-        <NavLinks currentPath={currentPath} client:idle />
-        <div class="hidden sm:block">
+    <div class="hidden sm:flex justify-between items-center">
+        <a href="/" class="md:text-3xl text-2xl font-bold text-ctp-mauve">Aaron Ye</a>
+        <nav class="flex items-center gap-6">
+            <NavLinks currentPath={currentPath} client:idle />
+            <span class="text-ctp-surface1">|</span>
             <Contacts />
-        </div>
-    </nav>
+        </nav>
+    </div>
 </div>
 <hr class="border-1 text-ctp-subtext0" />
