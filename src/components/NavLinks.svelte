@@ -7,25 +7,42 @@
             : currentPath;
 </script>
 
-<div class="flex gap-6">
+<div class="flex gap-8 text-sm sm:text-base">
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/"}
-        href="/">About</a
+        class="font-medium transition-colors duration-300 hover:text-accent-blue"
+        class:active={normalizedPath === "/"}
+        href="/"
     >
+        Home
+    </a>
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/projects"}
-        href="/projects">Projects</a
+        class="font-medium transition-colors duration-300 hover:text-accent-blue"
+        class:active={normalizedPath === "/projects"}
+        href="/projects"
     >
+        Projects
+    </a>
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/writing"}
-        href="/writing">Writing</a
+        class="font-medium transition-colors duration-300 hover:text-accent-blue"
+        class:active={normalizedPath === "/writing"}
+        href="/writing"
     >
+        Writing
+    </a>
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/guestbook"}
-        href="/guestbook">Guestbook</a
+        class="font-medium transition-colors duration-300 hover:text-accent-blue"
+        class:active={normalizedPath === "/guestbook"}
+        href="/guestbook"
     >
+        Guestbook
+    </a>
 </div>
+
+<style>
+    a {
+        color: var(--text-primary);
+    }
+    a.active {
+        color: var(--accent-blue);
+    }
+</style>

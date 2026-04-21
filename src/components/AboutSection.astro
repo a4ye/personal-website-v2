@@ -1,140 +1,136 @@
 ---
-import { Icon } from "astro-icon/components";
-import button from "../assets/button/button.gif";
 import { Image } from "astro:assets";
 import ottoLabsLogo from "../assets/logos/ottolabs.png"
 import uwaterlooLogo from "../assets/logos/uwaterloo.svg";
 import eurekahacksLogo from "../assets/logos/eurekahacks2025.svg";
 import counterspell from "../assets/logos/counterspell.png";
 import HackathonList from "./HackathonList.astro";
+import HeroBackground from "./HeroBackground.svelte";
 ---
 
-<h1 class="text-xl md:text-2xl lg:text-3xl font-bold pt-12 text-ctp-mauve">About Me</h1>
-<p class="pt-2 text-sm md:text-base leading-relaxed">
-    I’m a first-year Math student at the University of Waterloo pursuing software engineering. I
-    have experience building full-stack applications, with a focus on backend systems.
-</p>
+<!-- Full-bleed hero with iridescent WebGL background -->
+<section class="w-screen min-h-screen flex flex-col justify-center items-center relative -mt-[72px] sm:-mt-[88px] overflow-hidden">
+    <!-- WebGL shader background -->
+    <HeroBackground client:only="svelte" />
+    <!-- Grain texture overlay -->
+    <div class="hero-grain"></div>
 
-<h1 class="pt-8 font-bold text-lg md:text-xl">Currently:</h1>
-<ul class="list-none mt-3 space-y-2">
-  <li class="flex items-start gap-3 pl-0 sm:pl-2">
-    <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-    />
-    <span class="flex flex-wrap items-center text-sm md:text-base"
-    >Incoming Software Engineering Intern @&nbsp;<span class="inline-flex items-center flex-shrink-0"><Image
-                        src={ottoLabsLogo}
-                        alt="Otto Labs Logo"
-                        loading="eager"
-                        class="h-4 w-4 mr-1"
-                /><a
-            href="https://ottosr.com/"
-            class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium"
-            target="_blank"
-            rel="noopener noreferrer"
-    >Otto Labs</a></span></span
-    >
-  </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="flex items-center text-sm md:text-base"
-            >Studying Mathematics @ <span class="inline-block">
-                <Image
-                    src={uwaterlooLogo}
-                    alt="University of Waterloo Logo"
-                    loading="eager"
-                    class="h-4 w-4 ml-2 mr-1"
-                />
-            </span><a
-                href="https://uwaterloo.ca/"
-                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-                >UWaterloo
-            </a></span
-        >
-    </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="text-sm md:text-base"
-            >Learning about machine learning, AI, and systems programming</span
-        >
-    </li>
-</ul>
+    <!-- Hero content -->
+    <div class="relative z-10 text-center px-6 sm:px-12">
+        <h1 class="text-[4.5rem] sm:text-[7rem] md:text-[9rem] lg:text-[12rem] xl:text-[14rem] font-display font-bold leading-[0.85] tracking-tight text-white select-none">
+            Aaron Ye
+        </h1>
+        <p class="mt-6 sm:mt-8 text-lg sm:text-xl md:text-2xl text-white/80 font-light max-w-xl mx-auto leading-relaxed tracking-wide">
+            Engineer & creative developer
+        </p>
+    </div>
 
-<h1 class="pt-8 font-bold text-lg md:text-xl">Previously:</h1>
-<ul class="list-none mt-3 space-y-2">
-    <HackathonList />
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="text-sm md:text-base flex items-center">
-            Director of Tech @ <span class="inline-block">
-                <Image
-                    src={eurekahacksLogo}
-                    alt="EurekaHACKS 2025 Logo"
-                    loading="eager"
-                    class="h-4 w-4 ml-2 mr-1"
-                />
-            </span><a
-                href="https://2025.eurekahacks.ca/"
-                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-                >EurekaHACKS
-            </a>
-        </span>
-    </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="flex items-center text-sm md:text-base">
-            Organizer @ <span class="inline-block">
-                <Image
-                    src={counterspell}
-                    alt="Counterspell Logo"
-                    loading="eager"
-                    class="h-4 w-4 ml-2 mr-1"
-                />
-            </span><a
-                href="https://counterspell.hackclub.com/toronto"
-                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Counterspell Toronto
-            </a>
-        </span>
-    </li>
-</ul>
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+        <div class="w-5 h-8 rounded-full border-2 border-white/40 flex justify-center pt-1.5">
+            <div class="w-1 h-2 rounded-full bg-white/60 animate-bounce"></div>
+        </div>
+    </div>
+</section>
 
-<div class="mt-12">
-    <h2 class="text-lg md:text-xl font-bold text-ctp-mauve">Guestbook</h2>
-    <p class="pt-2 text-sm md:text-base leading-relaxed">
-        Feel free to leave a message in my <a
-            href="/guestbook"
-            class="text-ctp-mauve hover:underline font-medium">guestbook</a
-        >.
-    </p>
+<!-- Content sections in constrained container -->
+<div class="px-8 sm:px-16 md:px-24 lg:px-32 xl:px-48 flex justify-center">
+    <div class="w-full max-w-5xl">
+
+        <!-- Currently Section -->
+        <section class="pb-20 sm:pb-28 pt-20 sm:pt-28 animate-fadeInUp opacity-0 stagger-1">
+            <h2 class="text-4xl sm:text-5xl font-display font-bold pb-12" style="color: var(--text-primary);">Currently</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="p-6 rounded-lg" style="background: var(--bg-secondary); border: 1px solid var(--border);">
+                    <div class="flex items-center gap-3 mb-4">
+                        <Image
+                            src={ottoLabsLogo}
+                            alt="Otto Labs Logo"
+                            loading="eager"
+                            class="h-6 w-6"
+                        />
+                        <a href="https://ottosr.com/" target="_blank" rel="noopener noreferrer" class="text-lg font-semibold hover:text-accent-blue transition-colors" style="color: var(--text-primary);">
+                            Otto Labs
+                        </a>
+                    </div>
+                    <p style="color: var(--text-secondary);">Incoming Software Engineering Intern</p>
+                </div>
+                <div class="p-6 rounded-lg" style="background: var(--bg-secondary); border: 1px solid var(--border);">
+                    <div class="flex items-center gap-3 mb-4">
+                        <Image
+                            src={uwaterlooLogo}
+                            alt="University of Waterloo Logo"
+                            loading="eager"
+                            class="h-6 w-6"
+                        />
+                        <a href="https://uwaterloo.ca/" target="_blank" rel="noopener noreferrer" class="text-lg font-semibold hover:text-accent-pink transition-colors" style="color: var(--text-primary);">
+                            UWaterloo
+                        </a>
+                    </div>
+                    <p style="color: var(--text-secondary);">First-year Mathematics, pursuing Software Engineering</p>
+                </div>
+            </div>
+            <p class="text-lg mt-8 leading-relaxed" style="color: var(--text-secondary); max-width: 40rem;">
+                I'm learning about machine learning, AI systems, and backend engineering. Passionate about building products that scale and delight.
+            </p>
+        </section>
+
+        <!-- Previously Section -->
+        <section class="pb-20 sm:pb-28 border-t pt-20 sm:pt-24 animate-fadeInUp opacity-0 stagger-2" style="border-color: var(--border);">
+            <h2 class="text-4xl sm:text-5xl font-display font-bold pb-12" style="color: var(--text-primary);">Previously</h2>
+            <div class="space-y-12">
+                <div>
+                    <h3 class="text-xl font-semibold mb-6 text-accent-purple">Hackathon Experience</h3>
+                    <HackathonList />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="p-6 rounded-lg" style="background: var(--bg-secondary); border: 1px solid var(--border);">
+                        <div class="flex items-center gap-3 mb-4">
+                            <Image
+                                src={eurekahacksLogo}
+                                alt="EurekaHACKS 2025 Logo"
+                                loading="eager"
+                                class="h-6 w-6"
+                            />
+                            <a href="https://2025.eurekahacks.ca/" target="_blank" rel="noopener noreferrer" class="text-lg font-semibold hover:text-accent-blue transition-colors" style="color: var(--text-primary);">
+                                EurekaHACKS
+                            </a>
+                        </div>
+                        <p style="color: var(--text-secondary);">Director of Tech</p>
+                    </div>
+                    <div class="p-6 rounded-lg" style="background: var(--bg-secondary); border: 1px solid var(--border);">
+                        <div class="flex items-center gap-3 mb-4">
+                            <Image
+                                src={counterspell}
+                                alt="Counterspell Logo"
+                                loading="eager"
+                                class="h-6 w-6"
+                            />
+                            <a href="https://counterspell.hackclub.com/toronto" target="_blank" rel="noopener noreferrer" class="text-lg font-semibold hover:text-accent-pink transition-colors" style="color: var(--text-primary);">
+                                Counterspell Toronto
+                            </a>
+                        </div>
+                        <p style="color: var(--text-secondary);">Community Organizer</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="contact" class="pb-40 sm:pb-48 border-t pt-20 sm:pt-24 animate-fadeInUp opacity-0 stagger-3" style="border-color: var(--border);">
+            <h2 class="text-4xl sm:text-5xl font-display font-bold pb-8" style="color: var(--text-primary);">Let's talk</h2>
+            <p class="text-lg sm:text-xl leading-relaxed pb-8 max-w-2xl" style="color: var(--text-secondary);">
+                I'm always interested in new projects and opportunities. Feel free to reach out via email or sign my guestbook.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a href="mailto:hi@aaronye.dev" class="px-8 py-4 rounded-lg font-semibold text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));">
+                    Send me an email
+                </a>
+                <a href="/guestbook" class="px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-2" style="border-color: var(--text-primary); color: var(--text-primary);">
+                    Sign guestbook
+                </a>
+            </div>
+        </section>
+
+    </div>
 </div>
-
-<!--<div class="pt-16">-->
-<!--    <a href="https://aaronye.dev" target="_blank" rel="noreferrer noopener">-->
-<!--        <img src={button.src} alt="Aaron's 88x31 button" />-->
-<!--    </a>-->
-<!--</div>-->

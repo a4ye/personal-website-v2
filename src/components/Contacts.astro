@@ -3,17 +3,19 @@ import { Icon } from "astro-icon/components";
 import IconTooltip from "./IconTooltip";
 ---
 
-<div class="flex sm:justify-end gap-4">
+<div class="flex sm:justify-end gap-5">
     <IconTooltip label="GitHub" client:idle>
         <a
             aria-label="Github"
             href="https://github.com/a4ye/"
             target="_blank"
             rel="noreferrer noopener"
+            class="transition-all duration-200 hover:scale-110"
+            style="color: var(--text-tertiary);"
         >
             <Icon
                 name="lucide--github"
-                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+                class="w-5 h-5 hover:opacity-70"
             />
         </a>
     </IconTooltip>
@@ -23,10 +25,12 @@ import IconTooltip from "./IconTooltip";
             href="https://www.linkedin.com/in/aaron--ye"
             target="_blank"
             rel="noreferrer noopener"
+            class="transition-all duration-200 hover:scale-110"
+            style="color: var(--text-tertiary);"
         >
             <Icon
                 name="lucide--linkedin"
-                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+                class="w-5 h-5 hover:opacity-70"
             />
         </a>
     </IconTooltip>
@@ -36,10 +40,12 @@ import IconTooltip from "./IconTooltip";
             href="https://x.com/aaronye1001"
             target="_blank"
             rel="noreferrer noopener"
+            class="transition-all duration-200 hover:scale-110"
+            style="color: var(--text-tertiary);"
         >
             <Icon
                 name="ri--twitter-x-line"
-                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+                class="w-5 h-5 hover:opacity-70"
             />
         </a>
     </IconTooltip>
@@ -49,10 +55,12 @@ import IconTooltip from "./IconTooltip";
             href="mailto:aaronye1001@gmail.com"
             target="_blank"
             rel="noreferrer noopener"
+            class="transition-all duration-200 hover:scale-110"
+            style="color: var(--text-tertiary);"
         >
             <Icon
                 name="lucide--mail"
-                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+                class="w-5 h-5 hover:opacity-70"
             />
         </a>
     </IconTooltip>
@@ -62,10 +70,12 @@ import IconTooltip from "./IconTooltip";
             href="/resume"
             target="_blank"
             rel="noreferrer noopener"
+            class="transition-all duration-200 hover:scale-110"
+            style="color: var(--text-tertiary);"
         >
             <Icon
                 name="lucide--file-text"
-                class="w-4 h-4 text-ctp-subtext0 hover:text-ctp-mauve-100 transition-colors duration-200"
+                class="w-5 h-5 hover:opacity-70"
             />
         </a>
     </IconTooltip>

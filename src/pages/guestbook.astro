@@ -93,37 +93,57 @@ const formatMessage = (message: string) => {
 ---
 
 <Layout>
-    <div>
-        <h1 class="text-xl md:text-2xl lg:text-3xl pt-12 font-bold text-ctp-mauve">
-            Leave a message!
+    <div class="px-8 sm:px-16 md:px-24 lg:px-32 xl:px-48 flex justify-center">
+    <div class="w-full max-w-5xl">
+    <!-- Page Header -->
+    <section class="pb-16 sm:pb-20 animate-fadeInUp opacity-0">
+        <h1 class="text-5xl sm:text-6xl md:text-7xl font-display font-bold pb-6" style="color: var(--text-primary);">
+            Guestbook
         </h1>
-    </div>
-    <form id="guestbook-form" class="mt-4" aria-label="Guestbook form">
-        <div class="flex flex-col">
-            <label for="guestbookName">Name: <span class="text-ctp-red">*</span></label>
+        <p class="text-lg sm:text-xl leading-relaxed max-w-2xl" style="color: var(--text-secondary); font-weight: 300;">
+            Leave a message and say hello. I read and appreciate every entry.
+        </p>
+    </section>
+
+    <!-- Form -->
+    <form id="guestbook-form" class="pb-20 sm:pb-24 animate-fadeInUp opacity-0 stagger-1 max-w-2xl" aria-label="Guestbook form">
+        <div class="flex flex-col gap-3 pb-6">
+            <label for="guestbookName" class="font-semibold text-base" style="color: var(--text-primary);">
+                Name <span style="color: var(--accent-red);">*</span>
+            </label>
             <input
-                class="border-2 border-ctp-surface0 rounded mt-1 h-8 p-2 focus:outline-none hover:border-ctp-mauve-100 focus:border-ctp-mauve-100 duration-200"
+                class="border-2 h-12 px-4 text-base rounded-lg transition-all duration-300 focus:outline-none"
+                style="border-color: var(--border); background: var(--bg-secondary); color: var(--text-primary);"
                 type="text"
                 id="guestbookName"
                 name="name"
                 placeholder="Your Name"
                 required
                 aria-label="Name"
+                onfocus="this.style.borderColor='var(--accent-blue)'"
+                onblur="this.style.borderColor='var(--border)'"
             />
         </div>
-        <div class="flex flex-col pt-4">
-            <label for="guestbookMessage">Message: <span class="text-ctp-red">*</span></label>
+        <div class="flex flex-col gap-3 pb-8">
+            <label for="guestbookMessage" class="font-semibold text-base" style="color: var(--text-primary);">
+                Message <span style="color: var(--accent-red);">*</span>
+            </label>
             <textarea
-                class="border-2 border-ctp-surface0 transition-colors rounded mt-1 p-2 focus:outline-none hover:border-ctp-mauve-100 focus:border-ctp-mauve-100 duration-200"
+                class="border-2 p-4 text-base rounded-lg transition-all duration-300 focus:outline-none min-h-40"
+                style="border-color: var(--border); background: var(--bg-secondary); color: var(--text-primary);"
                 id="guestbookMessage"
                 name="message"
                 placeholder="Leave a message..."
                 required
-                aria-label="Message"></textarea>
+                aria-label="Message"
+                onfocus="this.style.borderColor='var(--accent-blue)'"
+                onblur="this.style.borderColor='var(--border)'"
+            ></textarea>
         </div>
         <button
             id="submit-button"
-            class="rounded text-ctp-base font-semibold hover:bg-ctp-mauve-300 duration-200 cursor-pointer p-1 w-24 bg-ctp-mauve mt-6 flex items-center justify-center"
+            class="font-semibold text-base transition-all duration-300 cursor-pointer px-8 py-3 flex items-center justify-center gap-2 rounded-lg text-white hover:shadow-lg hover:-translate-y-1"
+            style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));"
             type="submit"
             aria-label="Submit guestbook entry"
         >
@@ -131,24 +151,26 @@ const formatMessage = (message: string) => {
             <img
                 id="submit-loading"
                 class="hidden"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 src={loadingIcon.src}
                 alt="Loading..."
                 aria-label="Loading indicator"
             />
         </button>
-        <div class="flex flex-row">
+        <div class="flex flex-row gap-4 pt-4">
             <p
                 id="form-error"
-                class="pt-2 h-4 text-ctp-red"
+                class="h-5 text-sm font-medium"
+                style="color: var(--accent-red);"
                 aria-live="polite"
                 aria-label="Form error message"
             >
             </p>
             <p
                 id="form-success"
-                class="pt-2 h-4 text-ctp-green"
+                class="h-5 text-sm font-medium"
+                style="color: var(--accent-blue);"
                 aria-live="polite"
                 aria-label="Form success message"
             >
@@ -156,16 +178,17 @@ const formatMessage = (message: string) => {
         </div>
     </form>
 
-    <!-- Page info and mini paginator -->
+    <!-- Page info and pagination -->
     {
         totalEntries > 0 && (
             <div
-                class="flex justify-between items-center pt-12"
+                class="flex justify-between items-center pb-10"
                 data-pagination-container
                 aria-label="Pagination navigation"
             >
                 <p
-                    class="text-ctp-subtext0"
+                    class="text-sm"
+                    style="color: var(--text-tertiary);"
                     data-page-info
                     data-total-entries={totalEntries}
                     data-total-pages={totalPages}
@@ -182,7 +205,8 @@ const formatMessage = (message: string) => {
                     >
                         <a
                             href={page > 1 ? `?page=${page - 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === 1 ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
+                            class={`px-3 py-2 text-sm rounded-md transition-all duration-300 ${page === 1 ? "cursor-not-allowed opacity-30" : "hover:shadow-md"}`}
+                            style={page === 1 ? "color: var(--text-tertiary);" : "color: var(--text-primary); background: var(--bg-secondary);"}
                             aria-disabled={page === 1}
                             aria-label="Previous page"
                         >
@@ -190,13 +214,14 @@ const formatMessage = (message: string) => {
                         </a>
                         {miniPages.map((p) =>
                             p === "..." ? (
-                                <span class="text-sm text-ctp-subtext0 px-1" aria-hidden="true">
+                                <span class="text-sm px-2" style="color: var(--text-tertiary);" aria-hidden="true">
                                     ...
                                 </span>
                             ) : (
                                 <a
                                     href={`?page=${p}`}
-                                    class={`px-2 py-1 rounded text-sm duration-200 ${p === page ? "bg-ctp-mauve text-ctp-base font-semibold" : "text-ctp-text hover:bg-ctp-surface0"}`}
+                                    class={`px-3 py-2 text-sm rounded-md transition-all duration-300 ${p === page ? "font-semibold text-white" : "hover:shadow-md"}`}
+                                    style={p === page ? "background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: white;" : "color: var(--text-primary); background: var(--bg-secondary);"}
                                     aria-current={p === page ? "page" : undefined}
                                     aria-label={`Go to page ${p}`}
                                 >
@@ -206,7 +231,8 @@ const formatMessage = (message: string) => {
                         )}
                         <a
                             href={page < totalPages ? `?page=${page + 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === totalPages ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
+                            class={`px-3 py-2 text-sm rounded-md transition-all duration-300 ${page === totalPages ? "cursor-not-allowed opacity-30" : "hover:shadow-md"}`}
+                            style={page === totalPages ? "color: var(--text-tertiary);" : "color: var(--text-primary); background: var(--bg-secondary);"}
                             aria-disabled={page === totalPages}
                             aria-label="Next page"
                         >
@@ -220,34 +246,41 @@ const formatMessage = (message: string) => {
 
     <div
         id="entries-container"
-        class="flex flex-col gap-4 pt-4"
+        class="flex flex-col gap-4 pb-40"
         aria-label="Guestbook entries list"
     >
         {
             guestbookEntries.length === 0 ? (
                 <div
-                    class="text-center py-12 text-ctp-subtext0"
+                    class="text-center py-32"
+                    style="color: var(--text-secondary);"
                     data-empty-state
                     aria-label="No messages state"
                 >
-                    <p class="text-lg">No messages yet.</p>
-                    <p>Be the first to leave a message!</p>
+                    <p class="text-2xl font-display font-bold" style="color: var(--text-primary);">No messages yet.</p>
+                    <p class="text-base pt-2">Be the first to leave a message!</p>
                 </div>
             ) : (
-                guestbookEntries.map((entry) => (
-                    <div class="bg-ctp-mantle rounded p-4" aria-label="Guestbook entry">
-                        <div class="flex justify-between">
-                            <h1 class="font-semibold" aria-label="Entry author">
+                guestbookEntries.map((entry, index) => (
+                    <div
+                        class="p-6 sm:p-8 rounded-lg border animate-fadeInUp opacity-0 stagger-{index % 6 + 1} transition-all hover:shadow-md"
+                        style="border-color: var(--border); background: var(--bg-secondary);"
+                        aria-label="Guestbook entry"
+                    >
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 pb-4">
+                            <h3 class="font-display text-lg sm:text-xl font-bold" style="color: var(--text-primary);" aria-label="Entry author">
                                 {entry.name}
-                            </h1>
+                            </h3>
                             <span
-                                class="guestbook-date"
+                                class="guestbook-date text-xs sm:text-sm"
+                                style="color: var(--text-tertiary);"
                                 data-iso={entry.createdAt!}
                                 aria-label="Entry date"
                             />
                         </div>
                         <p
-                            class="pt-4"
+                            class="text-base leading-relaxed"
+                            style="color: var(--text-secondary);"
                             set:html={formatMessage(entry.message)}
                             aria-label="Entry message"
                         />
@@ -257,15 +290,16 @@ const formatMessage = (message: string) => {
         }
     </div>
 
-    <!-- Bottom page info and paginator -->
+    <!-- Bottom pagination -->
     {
         totalEntries > 0 && (
             <div
-                class="flex justify-between items-center pt-8 pb-12"
+                class="flex justify-between items-center border-t pt-10 pb-16"
+                style="border-color: var(--border);"
                 data-pagination-container
                 aria-label="Pagination navigation"
             >
-                <p class="text-ctp-subtext0" data-page-info aria-label="Page and message count">
+                <p class="text-sm" style="color: var(--text-tertiary);" data-page-info aria-label="Page and message count">
                     Page {page} of {totalPages} ({totalEntries}
                     {totalEntries === 1 ? "message" : "messages"})
                 </p>
@@ -277,7 +311,8 @@ const formatMessage = (message: string) => {
                     >
                         <a
                             href={page > 1 ? `?page=${page - 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === 1 ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
+                            class={`px-3 py-2 text-sm rounded-md transition-all duration-300 ${page === 1 ? "cursor-not-allowed opacity-30" : "hover:shadow-md"}`}
+                            style={page === 1 ? "color: var(--text-tertiary);" : "color: var(--text-primary); background: var(--bg-secondary);"}
                             aria-disabled={page === 1}
                             aria-label="Previous page"
                         >
@@ -285,13 +320,14 @@ const formatMessage = (message: string) => {
                         </a>
                         {miniPages.map((p) =>
                             p === "..." ? (
-                                <span class="text-sm text-ctp-subtext0 px-1" aria-hidden="true">
+                                <span class="text-sm px-2" style="color: var(--text-tertiary);" aria-hidden="true">
                                     ...
                                 </span>
                             ) : (
                                 <a
                                     href={`?page=${p}`}
-                                    class={`px-2 py-1 rounded text-sm duration-200 ${p === page ? "bg-ctp-mauve text-ctp-base font-semibold" : "text-ctp-text hover:bg-ctp-surface0"}`}
+                                    class={`px-3 py-2 text-sm rounded-md transition-all duration-300 ${p === page ? "font-semibold text-white" : "hover:shadow-md"}`}
+                                    style={p === page ? "background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: white;" : "color: var(--text-primary); background: var(--bg-secondary);"}
                                     aria-current={p === page ? "page" : undefined}
                                     aria-label={`Go to page ${p}`}
                                 >
@@ -301,7 +337,8 @@ const formatMessage = (message: string) => {
                         )}
                         <a
                             href={page < totalPages ? `?page=${page + 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === totalPages ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
+                            class={`px-3 py-2 text-sm rounded-md transition-all duration-300 ${page === totalPages ? "cursor-not-allowed opacity-30" : "hover:shadow-md"}`}
+                            style={page === totalPages ? "color: var(--text-tertiary);" : "color: var(--text-primary); background: var(--bg-secondary);"}
                             aria-disabled={page === totalPages}
                             aria-label="Next page"
                         >
@@ -312,6 +349,8 @@ const formatMessage = (message: string) => {
             </div>
         )
     }
+    </div>
+    </div>
 </Layout>
 
 <script>
@@ -396,10 +435,10 @@ const formatMessage = (message: string) => {
         if (existingContainers.length === 0 && totalEntries > 0) {
             // Create top pagination container
             const topContainer = document.createElement("div");
-            topContainer.className = "flex justify-between items-center pt-12";
+            topContainer.className = "flex justify-between items-center pb-10";
             topContainer.setAttribute("data-pagination-container", "");
             topContainer.innerHTML = `
-                <p class="text-ctp-subtext0" data-page-info data-total-entries="${totalEntries}" data-total-pages="${totalPages}">
+                <p class="text-sm" style="color: var(--text-tertiary);" data-page-info data-total-entries="${totalEntries}" data-total-pages="${totalPages}">
                     Page ${currentPage} of ${totalPages} (${totalEntries} ${totalEntries === 1 ? "message" : "messages"})
                 </p>
                 <div class="flex items-center gap-1" data-paginator></div>
@@ -408,10 +447,11 @@ const formatMessage = (message: string) => {
 
             // Create bottom pagination container
             const bottomContainer = document.createElement("div");
-            bottomContainer.className = "flex justify-between items-center pt-8 pb-12";
+            bottomContainer.className = "flex justify-between items-center border-t pt-10 pb-16";
+            bottomContainer.style.borderColor = "var(--border)";
             bottomContainer.setAttribute("data-pagination-container", "");
             bottomContainer.innerHTML = `
-                <p class="text-ctp-subtext0" data-page-info>
+                <p class="text-sm" style="color: var(--text-tertiary);" data-page-info>
                     Page ${currentPage} of ${totalPages} (${totalEntries} ${totalEntries === 1 ? "message" : "messages"})
                 </p>
                 <div class="flex items-center gap-1" data-paginator></div>
@@ -454,7 +494,8 @@ const formatMessage = (message: string) => {
 
             let html = `
                 <a href="${currentPage > 1 ? `?page=${currentPage - 1}` : "javascript:void(0)"}"
-                   class="px-2 py-1 rounded text-sm ${currentPage === 1 ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}"
+                   class="px-3 py-2 text-sm rounded-md transition-all duration-300 ${currentPage === 1 ? "cursor-not-allowed opacity-30" : "hover:shadow-md"}"
+                   style="${currentPage === 1 ? "color: var(--text-tertiary);" : "color: var(--text-primary); background: var(--bg-secondary);"}"
                    ${currentPage === 1 ? 'aria-disabled="true"' : ""}>
                     ←
                 </a>
@@ -462,11 +503,12 @@ const formatMessage = (message: string) => {
 
             miniPages.forEach((p) => {
                 if (p === "...") {
-                    html += `<span class="text-sm text-ctp-subtext0 px-1">...</span>`;
+                    html += `<span class="text-sm px-2" style="color: var(--text-tertiary);">...</span>`;
                 } else {
                     html += `
                         <a href="?page=${p}"
-                           class="px-2 py-1 rounded text-sm duration-200 ${p === currentPage ? "bg-ctp-mauve text-ctp-base font-semibold" : "text-ctp-text hover:bg-ctp-surface0"}">
+                           class="px-3 py-2 text-sm rounded-md transition-all duration-300 ${p === currentPage ? "font-semibold text-white" : "hover:shadow-md"}"
+                           style="${p === currentPage ? "background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: white;" : "color: var(--text-primary); background: var(--bg-secondary);"}">
                             ${p}
                         </a>
                     `;
@@ -475,7 +517,8 @@ const formatMessage = (message: string) => {
 
             html += `
                 <a href="${currentPage < totalPages ? `?page=${currentPage + 1}` : "javascript:void(0)"}"
-                   class="px-2 py-1 rounded text-sm ${currentPage === totalPages ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}"
+                   class="px-3 py-2 text-sm rounded-md transition-all duration-300 ${currentPage === totalPages ? "cursor-not-allowed opacity-30" : "hover:shadow-md"}"
+                   style="${currentPage === totalPages ? "color: var(--text-tertiary);" : "color: var(--text-primary); background: var(--bg-secondary);"}"
                    ${currentPage === totalPages ? 'aria-disabled="true"' : ""}>
                     →
                 </a>
@@ -600,17 +643,21 @@ const formatMessage = (message: string) => {
             }
 
             const entryWrapper = document.createElement("div");
-            entryWrapper.className = "bg-ctp-mantle rounded p-4";
+            entryWrapper.className = "p-6 sm:p-8 rounded-lg border transition-all hover:shadow-md";
+            entryWrapper.style.borderColor = "var(--border)";
+            entryWrapper.style.background = "var(--bg-secondary)";
 
             const header = document.createElement("div");
-            header.className = "flex justify-between";
+            header.className = "flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 pb-4";
 
-            const nameEl = document.createElement("h1");
-            nameEl.className = "font-semibold";
+            const nameEl = document.createElement("h3");
+            nameEl.className = "font-display text-lg sm:text-xl font-bold";
+            nameEl.style.color = "var(--text-primary)";
             nameEl.textContent = decodeEntities(result.data.name || "");
 
             const dateEl = document.createElement("span");
-            dateEl.className = "guestbook-date";
+            dateEl.className = "guestbook-date text-xs sm:text-sm";
+            dateEl.style.color = "var(--text-tertiary)";
             const dateValue = result.data.createdAt ? String(result.data.createdAt) : "";
             dateEl.setAttribute("data-iso", dateValue);
             // Will be formatted by formatAllDatesToLocal()
@@ -619,6 +666,8 @@ const formatMessage = (message: string) => {
             header.appendChild(dateEl);
 
             const messageEl = createMessageParagraph(result.data.message || "");
+            messageEl.className = "text-base leading-relaxed";
+            messageEl.style.color = "var(--text-secondary)";
 
             entryWrapper.appendChild(header);
             entryWrapper.appendChild(messageEl);
@@ -640,12 +689,12 @@ const formatMessage = (message: string) => {
                     entriesContainer.innerHTML = data.entries
                         .map(
                             (entry: any) => `
-                        <div class="bg-ctp-mantle rounded p-4">
-                            <div class="flex justify-between">
-                                <h1 class="font-semibold">${sanitize(entry.name)}</h1>
-                                <span class="guestbook-date" data-iso="${entry.createdAt}"></span>
+                        <div class="p-6 sm:p-8 rounded-lg border transition-all hover:shadow-md" style="border-color: var(--border); background: var(--bg-secondary);">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 pb-4">
+                                <h3 class="font-display text-lg sm:text-xl font-bold" style="color: var(--text-primary);">${sanitize(entry.name)}</h3>
+                                <span class="guestbook-date text-xs sm:text-sm" style="color: var(--text-tertiary);" data-iso="${entry.createdAt}"></span>
                             </div>
-                            <p>${sanitize(entry.message, true)}</p>
+                            <p class="text-base leading-relaxed" style="color: var(--text-secondary);">${sanitize(entry.message, true)}</p>
                         </div>
                     `,
                         )

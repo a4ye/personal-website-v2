@@ -1,10 +1,7 @@
 ---
 import "../styles/global.css";
-import "@fontsource/figtree";
 import Footer from "../components/Footer.astro";
-// import Snow from "../components/Snow.svelte";
 import Spring from "../components/Spring.svelte";
-// import Rain from "../components/Rain.svelte";
 import TitleSection from "../components/TitleSection.astro";
 
 const env = import.meta.env.PUBLIC_ENV as string;
@@ -21,7 +18,10 @@ const env = import.meta.env.PUBLIC_ENV as string;
         <script is:inline>
             (function () {
                 var theme = localStorage.getItem("theme");
-                if (theme !== "latte" && theme !== "mocha") theme = "mocha";
+                // Convert old theme names to new system
+                if (theme === "latte") theme = "light";
+                if (theme === "mocha") theme = "dark";
+                if (theme !== "light" && theme !== "dark") theme = "light";
                 document.documentElement.className = theme;
             })();
         </script>
@@ -35,18 +35,18 @@ const env = import.meta.env.PUBLIC_ENV as string;
             )
         }
     </head>
-    <body class="bg-ctp-base text-ctp-text">
+    <body style="background: var(--bg-primary); color: var(--text-primary);" class="antialiased">
         <div class="flex flex-col justify-between min-h-screen">
             <div>
-                <!-- <Snow client:only="svelte" /> -->
                 <Spring client:only="svelte" />
-                <!-- <Rain client:only="svelte" /> -->
-                <div class="px-6 sm:px-12 md:px-24 lg:px-36 flex justify-center">
-                    <div class="w-full max-w-3xl">
+                <!-- Navigation in constrained container -->
+                <div class="px-8 sm:px-16 md:px-24 lg:px-32 xl:px-48 flex justify-center relative z-20">
+                    <div class="w-full max-w-5xl">
                         <TitleSection />
-                        <slot />
                     </div>
                 </div>
+                <!-- Content slot: hero can be full-bleed, other sections constrained -->
+                <slot />
             </div>
             <Footer />
         </div>
