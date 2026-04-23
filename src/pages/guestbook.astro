@@ -2,6 +2,7 @@
 export const prerender = false;
 import { getGuestbookEntriesPaginated, countGuestbookEntries } from "@/lib/sqlc/guestbook_sql";
 import { db } from "@/lib/database";
+import { getPageNumbers } from "@/lib/pagination";
 import Layout from "../layouts/Layout.astro";
 import loadingIcon from "../assets/icons/eos-icons--loading.svg";
 import sanitizeHtml from "sanitize-html";
@@ -26,36 +27,6 @@ if (totalPages > 0 && page > totalPages) {
 const guestbookEntries = await getGuestbookEntriesPaginated(db, {
     offset: ((page - 1) * ENTRIES_PER_PAGE).toString(),
 });
-
-function getPageNumbers(current: number, total: number): (number | "...")[] {
-    if (total <= 3) {
-        return Array.from({ length: total }, (_, i) => i + 1);
-    }
-
-    const pages: (number | "...")[] = [];
-
-    if (current === 1) {
-        pages.push(1, 2, 3);
-        if (total > 4) pages.push("...");
-        if (total > 3) pages.push(total);
-    } else if (current === total) {
-        if (total > 3) pages.push(1);
-        if (total > 4) pages.push("...");
-        pages.push(total - 2, total - 1, total);
-    } else {
-        if (current > 2) {
-            pages.push(1);
-            if (current > 3) pages.push("...");
-        }
-        pages.push(current - 1, current, current + 1);
-        if (current < total - 1) {
-            if (current < total - 2) pages.push("...");
-            pages.push(total);
-        }
-    }
-
-    return pages;
-}
 
 const miniPages = getPageNumbers(page, totalPages);
 
@@ -257,6 +228,7 @@ const pageBtnDisabled = `${pageBtnBase} text-line pointer-events-none`;
 
 <script>
     import { actions, isInputError } from "astro:actions";
+    import { getPageNumbers } from "@/lib/pagination";
 
     // Tailwind class strings for JS-generated DOM (must be full strings for content scanning)
     const BTN_BASE = "py-1 px-2 text-[0.9rem] no-underline rounded transition-colors duration-200";
@@ -297,31 +269,6 @@ const pageBtnDisabled = `${pageBtnBase} text-line pointer-events-none`;
         submitButton.disabled = loading;
         submitText.classList.toggle("hidden", loading);
         submitLoading.classList.toggle("hidden", !loading);
-    }
-
-    function getPageNumbers(current: number, total: number): (number | "...")[] {
-        if (total <= 3) return Array.from({ length: total }, (_, i) => i + 1);
-        const pages: (number | "...")[] = [];
-        if (current === 1) {
-            pages.push(1, 2, 3);
-            if (total > 4) pages.push("...");
-            if (total > 3) pages.push(total);
-        } else if (current === total) {
-            if (total > 3) pages.push(1);
-            if (total > 4) pages.push("...");
-            pages.push(total - 2, total - 1, total);
-        } else {
-            if (current > 2) {
-                pages.push(1);
-                if (current > 3) pages.push("...");
-            }
-            pages.push(current - 1, current, current + 1);
-            if (current < total - 1) {
-                if (current < total - 2) pages.push("...");
-                pages.push(total);
-            }
-        }
-        return pages;
     }
 
     function formatDateLocal(iso: string): string {

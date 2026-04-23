@@ -16,7 +16,7 @@ export default function GitTooltip({
                 </TooltipTrigger>
                 <TooltipContent>
                     {commitDate && `Last updated on ${new Date(commitDate).toLocaleDateString()}`}
-                    {!commitDate && "Error fetching lastest commit"}
+                    {!commitDate && "Error fetching latest commit"}
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>

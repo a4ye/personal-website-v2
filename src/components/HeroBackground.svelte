@@ -69,92 +69,63 @@
         void main() {
             vec2 uv = v_uv;
 
-            // Rotate 90 degrees clockwise (portrait to landscape)
-            vec2 rotated = vec2(1.0 - uv.y, uv.x);
-
-            // Match image aspect ratio to screen via cover-fit UV transform
-            // Original image is 1080x2337, after 90° rotation it's 2337x1080
             float screenAspect = u_resolution.x / u_resolution.y;
-            float imageAspect = 2337.0 / 1080.0;
-            vec2 texUV = rotated;
-            if (screenAspect > imageAspect) {
-                float scale = screenAspect / imageAspect;
-                texUV.y = (texUV.y - 0.5) / scale + 0.5;
+
+            // On landscape screens rotate 90° clockwise; on portrait use image as-is
+            vec2 texUV;
+            float imageAspect;
+            if (screenAspect >= 1.0) {
+                texUV = vec2(1.0 - uv.y, uv.x);
+                imageAspect = 1530.0 / 1122.0;
+                // After rotation UV axes are swapped, so crop logic is inverted
+                if (screenAspect > imageAspect) {
+                    float scale = screenAspect / imageAspect;
+                    texUV.x = (texUV.x - 0.5) / scale + 0.5;
+                } else {
+                    float scale = imageAspect / screenAspect;
+                    texUV.y = (texUV.y - 0.5) / scale + 0.5;
+                }
             } else {
-                float scale = imageAspect / screenAspect;
-                texUV.x = (texUV.x - 0.5) / scale + 0.5;
+                texUV = vec2(1.0 - uv.x, 1.0 - uv.y);
+                imageAspect = 1122.0 / 1530.0;
+                if (screenAspect > imageAspect) {
+                    float scale = screenAspect / imageAspect;
+                    texUV.y = (texUV.y - 0.5) / scale + 0.5;
+                } else {
+                    float scale = imageAspect / screenAspect;
+                    texUV.x = (texUV.x - 0.5) / scale + 0.5;
+                }
             }
 
             // Mirror horizontally
             texUV.y = 1.0 - texUV.y;
 
-            // Mouse-driven center for liquify pass 1
+            // Liquify pass 1
             vec2 center1 = vec2(0.5, 0.5) + (u_mouse - 0.5) * 0.3;
-
-            // Liquify pass 1: mouse-tracking distortion only (no auto-animation)
             float freq1 = 5.0 * (0.14 + 0.1);
             float amp1 = 0.34 * mix(0.2, 0.2 / (0.14 + 0.05), 0.25) * 0.4;
-            vec2 liq1 = liquify(texUV, 0.8807, freq1, amp1, 0.0, center1);
+            vec2 uv1 = mix(texUV, liquify(texUV, 0.8807, freq1, amp1, 0.0, center1), 0.15);
 
-            // Chromatic aberration for pass 1 (subtle: 0.01)
-            vec2 dir1 = liq1 - texUV;
-            float len1 = length(dir1);
-            vec2 ndir1 = len1 > 0.001 ? dir1 / len1 : vec2(0.0);
-            float chromAbb1 = 0.0;
-
-            vec2 offsetR1 = liq1 + chromAbb1 * ndir1 * len1;
-            vec2 offsetG1 = liq1;
-            vec2 offsetB1 = liq1 - chromAbb1 * ndir1 * len1;
-
-            float mixAmt1 = 0.15;
-            vec2 uvR = mix(texUV, offsetR1, mixAmt1);
-            vec2 uvG = mix(texUV, offsetG1, mixAmt1);
-            vec2 uvB = mix(texUV, offsetB1, mixAmt1);
-
-            // Liquify pass 2: mouse-driven distortion
+            // Liquify pass 2
             vec2 center2 = vec2(0.5, 0.5) + (u_mouse - 0.5) * 0.2;
             float freq2 = 5.0 * (1.27 + 0.1);
             float amp2 = 0.23 * mix(0.2, 0.2 / (1.27 + 0.05), 0.25) * 0.2;
-
-            vec2 liqR = liquify(uvR, 0.121, freq2, amp2, 0.0, center2);
-            vec2 liqG = liquify(uvG, 0.121, freq2, amp2, 0.0, center2);
-            vec2 liqB = liquify(uvB, 0.121, freq2, amp2, 0.0, center2);
-
-            // Chromatic aberration for pass 2 (strong: 0.67)
-            float chromAbb2 = 0.0;
-            float mixAmt2 = 0.08;
-
-            vec2 dirR = liqR - uvR;
-            float distR = length(dirR);
-            vec2 ndirR = distR > 0.001 ? dirR / distR : vec2(0.0);
-
-            vec2 dirB = liqB - uvB;
-            float distB = length(dirB);
-            vec2 ndirB = distB > 0.001 ? dirB / distB : vec2(0.0);
-
-            vec2 finalR = mix(uvR, liqR + chromAbb2 * ndirR * distR, mixAmt2);
-            vec2 finalG = mix(uvG, liqG, mixAmt2);
-            vec2 finalB = mix(uvB, liqB - chromAbb2 * ndirB * distB, mixAmt2);
-
-            // Clamp UVs to prevent wrapping artifacts
-            finalR = clamp(finalR, 0.0, 1.0);
-            finalG = clamp(finalG, 0.0, 1.0);
-            finalB = clamp(finalB, 0.0, 1.0);
+            vec2 finalUV = clamp(mix(uv1, liquify(uv1, 0.121, freq2, amp2, 0.0, center2), 0.08), 0.0, 1.0);
 
             // Sample image texture with gaussian blur
             vec2 texelSize = 1.0 / u_resolution;
             float blurRadius = 1.5;
 
             vec3 color = vec3(0.0);
-            color += texture2D(u_texture, finalG + texelSize * vec2(-1.0, -1.0) * blurRadius).rgb * 0.0625;
-            color += texture2D(u_texture, finalG + texelSize * vec2( 0.0, -1.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalG + texelSize * vec2( 1.0, -1.0) * blurRadius).rgb * 0.0625;
-            color += texture2D(u_texture, finalG + texelSize * vec2(-1.0,  0.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalG).rgb * 0.25;
-            color += texture2D(u_texture, finalG + texelSize * vec2( 1.0,  0.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalG + texelSize * vec2(-1.0,  1.0) * blurRadius).rgb * 0.0625;
-            color += texture2D(u_texture, finalG + texelSize * vec2( 0.0,  1.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalG + texelSize * vec2( 1.0,  1.0) * blurRadius).rgb * 0.0625;
+            color += texture2D(u_texture, finalUV + texelSize * vec2(-1.0, -1.0) * blurRadius).rgb * 0.0625;
+            color += texture2D(u_texture, finalUV + texelSize * vec2( 0.0, -1.0) * blurRadius).rgb * 0.125;
+            color += texture2D(u_texture, finalUV + texelSize * vec2( 1.0, -1.0) * blurRadius).rgb * 0.0625;
+            color += texture2D(u_texture, finalUV + texelSize * vec2(-1.0,  0.0) * blurRadius).rgb * 0.125;
+            color += texture2D(u_texture, finalUV).rgb * 0.25;
+            color += texture2D(u_texture, finalUV + texelSize * vec2( 1.0,  0.0) * blurRadius).rgb * 0.125;
+            color += texture2D(u_texture, finalUV + texelSize * vec2(-1.0,  1.0) * blurRadius).rgb * 0.0625;
+            color += texture2D(u_texture, finalUV + texelSize * vec2( 0.0,  1.0) * blurRadius).rgb * 0.125;
+            color += texture2D(u_texture, finalUV + texelSize * vec2( 1.0,  1.0) * blurRadius).rgb * 0.0625;
 
             // Hue shift
             if (u_hueShift > 0.001) {
@@ -180,7 +151,7 @@
                 }
             }
 
-            color = clamp((color - 0.5) + 0.5, 0.0, 1.0);
+            color = clamp(color, 0.0, 1.0);
 
             gl_FragColor = vec4(color, 1.0);
         }
@@ -265,15 +236,11 @@
         mouseX += (targetMouseX - mouseX) * smoothing;
         mouseY += (targetMouseY - mouseY) * smoothing;
 
-        if ("useProgram" in gl) {
-            gl.useProgram(program);
-        }
+        gl.useProgram(program);
 
         gl.uniform1f(gl.getUniformLocation(program, 'u_time'), elapsed);
         gl.uniform2f(gl.getUniformLocation(program, 'u_resolution'), canvas.width, canvas.height);
-        if ("uniform2f" in gl) {
-            gl.uniform2f(gl.getUniformLocation(program, "u_mouse"), mouseX, mouseY);
-        }
+        gl.uniform2f(gl.getUniformLocation(program, 'u_mouse'), mouseX, mouseY);
         gl.uniform1i(gl.getUniformLocation(program, 'u_texture'), 0);
         gl.uniform1f(gl.getUniformLocation(program, 'u_hueShift'), hueShift);
 

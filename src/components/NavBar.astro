@@ -1,6 +1,7 @@
 ---
 import NavLinks from "./NavLinks.svelte";
 import Contacts from "./Contacts.astro";
+import MobileNav from "./MobileNav.svelte";
 
 interface Props {
     currentPath: string;
@@ -12,6 +13,7 @@ const { currentPath } = Astro.props;
 <a href="/" class="font-serif text-xl text-accent no-underline">aaron ye</a>
 <div class="flex items-center gap-6">
     <NavLinks {currentPath} client:idle />
-    <span class="text-line">|</span>
+    <span class="hidden md:inline text-line">|</span>
     <Contacts />
+    <MobileNav client:load />
 </div>
