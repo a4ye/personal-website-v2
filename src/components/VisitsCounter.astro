@@ -5,18 +5,18 @@ import VisitsCounterTooltip from "./VisitsCounterTooltip";
 
 <VisitsCounterTooltip client:idle>
     <span
-        class="flex items-center gap-2 hover:text-ctp-mauve-100 duration-200 group"
+        class="flex items-center gap-2 hover:text-accent duration-200 group"
         id="visits-counter"
     >
         <Icon
             name="tabler--eye"
-            class="mt-0.5 w-4 h-4 text-ctp-subtext0 group-hover:text-ctp-mauve-100 duration-200"
+            class="mt-0.5 w-4 h-4 text-muted group-hover:text-accent duration-200"
             aria-hidden="true"
         />
         <span id="visits-count">loading...</span>
     </span>
     <span slot="fallback" class="flex items-center gap-2">
-        <Icon name="tabler--eye" class="mt-0.5 w-4 h-4 text-ctp-subtext0" aria-hidden="true" />
+        <Icon name="tabler--eye" class="mt-0.5 w-4 h-4 text-muted" aria-hidden="true" />
         <span>loading...</span>
     </span>
 </VisitsCounterTooltip>

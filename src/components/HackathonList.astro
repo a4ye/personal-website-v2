@@ -1,5 +1,4 @@
 ---
-import { Icon } from "astro-icon/components";
 import nsbehacks2026Logo from "../assets/logos/nsbe2026.png";
 import htn2025Logo from "../assets/logos/htn2025.svg";
 import htn2024Logo from "../assets/logos/htn2024.png";
@@ -11,146 +10,48 @@ import apocalypse from "../assets/logos/apocalypse.png";
 import eurekahacksLogo from "../assets/logos/eurekahacks2024.png";
 import alicehacksLogo from "../assets/logos/alicehacks.png";
 import focushacksLogo from "../assets/logos/focushacks.png";
+import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
 
 const hackathons = [
-    {
-        name: "NSBEHacks 2026",
-        logo: nsbehacks2026Logo,
-        link: "https://nsbehacksuoft.ca/",
-        result: "1st Place Ripple Track",
-    },
-    {
-        name: "Hack the North 2025",
-        logo: htn2025Logo,
-        link: "https://hackthenorth.com/",
-        result: "Finalist",
-    },
-    {
-        name: "JAMHacks 2025",
-        logo: jamhacksLogo,
-        link: "https://jamhacks.ca/",
-        result: "1st Place Overall",
-    },
-    {
-        name: "NSBEHacks 2025",
-        logo: nsbehacks2025Logo,
-        link: "https://nsbehacksuoft.ca/",
-        result: "2nd Place Overall",
-    },
-    {
-        name: "Hack the Valley 2024",
-        logo: htv2024,
-        link: "https://hackthevalley.io/",
-        result: "ICP Award",
-    },
-    {
-        name: "Hack the North 2024",
-        logo: htn2024Logo,
-        link: "https://2024.hackthenorth.com/",
-        result: "Finalist",
-    },
-    {
-        name: "STEMist Hacks 2024",
-        logo: stemist,
-        link: "https://www.joinstemist.org/",
-        result: "First Place",
-    },
-    {
-        name: "Apocalypse 2024",
-        logo: apocalypse,
-        link: "https://apocalypse.hackclub.com/",
-        result: "Top 7",
-    },
-    {
-        name: "EurekaHACKS 2024",
-        logo: eurekahacksLogo,
-        link: "https://2024.eurekahacks.ca/",
-        result: "First Place",
-    },
-    {
-        name: "FOCUS Hacks 2024",
-        logo: focushacksLogo,
-        link: "https://www.focusyouthorg.ca/focus-hacks",
-        result: "First Place",
-    },
-    {
-        name: "NSBEHacks 2024",
-        logo: nsbehacks2025Logo,
-        link: "https://nsbehacksuoft.ca/",
-        result: "Top 4",
-    },
-    {
-        name: "AliceHacks 2023",
-        logo: alicehacksLogo,
-        link: "https://alicehacks.devpost.com/",
-        result: "Best Beginner Hack",
-    },
+    { name: "NSBEHacks 2026", logo: nsbehacks2026Logo, link: "https://nsbehacksuoft.ca/", result: "1st Place Ripple Track" },
+    { name: "Hack the North 2025", logo: htn2025Logo, link: "https://hackthenorth.com/", result: "Finalist" },
+    { name: "JAMHacks 2025", logo: jamhacksLogo, link: "https://jamhacks.ca/", result: "1st Place Overall" },
+    { name: "NSBEHacks 2025", logo: nsbehacks2025Logo, link: "https://nsbehacksuoft.ca/", result: "2nd Place Overall" },
+    { name: "Hack the Valley 2024", logo: htv2024, link: "https://hackthevalley.io/", result: "ICP Award" },
+    { name: "Hack the North 2024", logo: htn2024Logo, link: "https://2024.hackthenorth.com/", result: "Finalist" },
+    { name: "STEMist Hacks 2024", logo: stemist, link: "https://www.joinstemist.org/", result: "First Place", invert: true },
+    { name: "Apocalypse 2024", logo: apocalypse, link: "https://apocalypse.hackclub.com/", result: "Top 7" },
+    { name: "EurekaHACKS 2024", logo: eurekahacksLogo, link: "https://2024.eurekahacks.ca/", result: "First Place" },
+    { name: "FOCUS Hacks 2024", logo: focushacksLogo, link: "https://www.focusyouthorg.ca/focus-hacks", result: "First Place" },
+    { name: "NSBEHacks 2024", logo: nsbehacks2025Logo, link: "https://nsbehacksuoft.ca/", result: "Top 4" },
+    { name: "AliceHacks 2023", logo: alicehacksLogo, link: "https://alicehacks.devpost.com/", result: "Best Beginner Hack", invert: true },
 ];
 ---
 
-<li class="flex items-start gap-3 pl-0 sm:pl-2">
-    <Icon
-        name="iconamoon--arrow-right-2-bold"
-        class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-        aria-hidden="true"
-    />
-    <details
-        class="text-sm md:text-base group"
-        id="hackathon-details"
-        aria-label="Hackathon wins list"
-    >
-        <summary
-            class="cursor-pointer select-none font-medium text-ctp-text flex items-center gap-1"
-            aria-label="Expand to see hackathon wins"
-        >
+<li class="flex items-center gap-3">
+    <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+    <details class="flex-1 group">
+        <summary class="cursor-pointer flex items-center gap-2 list-none text-base">
             <span>12x hackathon winner</span>
-            <span
-                id="hackathon-arrow"
-                class="transition-transform duration-200 group-open:rotate-180"
-            >
+            <span class="text-accent inline-flex transition-transform duration-200 group-open:rotate-180">
                 <Icon name="iconamoon--arrow-down-2" class="w-4 h-4" aria-hidden="true" />
             </span>
         </summary>
-        <ul
-            id="hackathon-list"
-            class="sm:pl-4 mt-1 space-y-1 text-xs sm:text-sm"
-            aria-label="List of hackathons won"
-        >
-            {
-                hackathons.map((h) => (
-                    <li
-                        class="flex items-start gap-2"
-                        aria-label={`Hackathon: ${h.name}, Result: ${h.result}`}
-                    >
-                        <Icon
-                            name="mage--l-arrow-down-right"
-                            class="w-2 h-2 sm:w-3 sm:h-3 text-ctp-mauve-100 mt-1 flex-shrink-0"
-                            aria-hidden="true"
-                        />
-                        <span class="flex items-center">
-                            <span class="flex flex-row justify-center w-4 sm:w-5">
-                                <Image
-                                    src={h.logo}
-                                    alt={`${h.name} Logo`}
-                                    loading="eager"
-                                    class="h-3 sm:h-4 w-auto mr-1"
-                                />
-                            </span>
-                            <a
-                                href={h.link}
-                                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={`Visit ${h.name} website`}
-                            >
-                                {h.name}
-                            </a>
-                            &nbsp;• {h.result}
-                        </span>
-                    </li>
-                ))
-            }
+        <ul class="list-none p-0 mt-2 ml-2 flex flex-col gap-1.5 text-sm">
+            {hackathons.map((h) => (
+                <li class="flex items-center gap-2">
+                    <Icon name="mage--l-arrow-down-right" class="w-3 h-3 text-accent shrink-0" aria-hidden="true" />
+                    <Image src={h.logo} alt={h.name} class={`w-4 h-4 object-contain${h.invert ? " invert" : ""}`} />
+                    <a
+                        href={h.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >{h.name}</a>
+                    <span class="text-muted">— {h.result}</span>
+                </li>
+            ))}
         </ul>
     </details>
 </li>

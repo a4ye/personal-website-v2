@@ -14,7 +14,7 @@
   <g
      id="layer1">
     <rect
-       style="fill:#1e1e2e;fill-opacity:1;stroke-width:10.5833;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       style="fill:#051515;fill-opacity:1;stroke-width:10.5833;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
        id="rect1"
        width="32.000004"
        height="32.000004"
@@ -22,12 +22,12 @@
        y="0" />
     <text
        xml:space="preserve"
-       style="font-size:22.1156px;line-height:0.85;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#cba6f7;fill-opacity:1;stroke-width:4.6074;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       style="font-size:22.1156px;line-height:0.85;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:##3d6b55;fill-opacity:1;stroke-width:4.6074;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
        x="16.000002"
        y="24.335379"
        id="text3"><tspan
          id="tspan3"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#cba6f7;fill-opacity:1;stroke-width:4.6074"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#4d6b55;fill-opacity:1;stroke-width:4.6074"
          x="16.000002"
          y="24.335379">A</tspan></text>
   </g>

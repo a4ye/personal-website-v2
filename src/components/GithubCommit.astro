@@ -12,11 +12,11 @@ const githubCommitData = await githubCommitResponse.json();
         href={githubCommitData.commitUrl}
         target="_blank"
         rel="noreferrer noopener"
-        class="flex items-center gap-2 hover:text-ctp-mauve-100 duration-200 group"
+        class="flex items-center gap-2 hover:text-accent duration-200 group"
     >
         <Icon
             name="tabler--git-commit"
-            class="mt-0.5 w-4 h-4 text-ctp-subtext0 group-hover:text-ctp-mauve-100 duration-200"
+            class="mt-0.5 w-4 h-4 text-muted group-hover:text-accent duration-200"
             aria-hidden="true"
         />
         <span>{githubCommitData.shortSha ?? "unknown"}</span>
@@ -30,7 +30,7 @@ const githubCommitData = await githubCommitResponse.json();
     >
         <Icon
             name="tabler--git-commit"
-            class="mt-0.5 w-4 h-4 text-ctp-subtext0"
+            class="mt-0.5 w-4 h-4 text-muted"
             aria-hidden="true"
         />
         <span>loading...</span>

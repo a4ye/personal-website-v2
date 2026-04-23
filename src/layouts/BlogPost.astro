@@ -22,145 +22,179 @@ const formatDate = (date: Date) => {
         year: "numeric",
         month: "long",
         day: "numeric",
-    }).format(date);
+    }).format(date).toUpperCase();
 };
 ---
 
 <Layout>
-    <article class="pt-12">
+    <div class="max-w-3xl mx-auto pt-14 pb-16">
         <a
             href="/writing"
-            class="inline-flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-mauve transition-colors duration-200 mb-8"
+            class="inline-flex items-center gap-[0.4rem] text-[0.85rem] text-muted no-underline tracking-[0.03em] mb-10 transition-colors duration-200 hover:text-accent"
         >
             <Icon
                 name="iconamoon--arrow-right-2-bold"
-                class="w-4 h-4 rotate-180 translate-y-0.5"
+                class="w-4 h-4 rotate-180 -translate-y-px"
                 aria-hidden="true"
             />
             Back to writing
         </a>
 
-        <header class="mb-8">
-            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-ctp-mauve leading-tight">
-                {frontmatter.title}
-            </h1>
-            <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-ctp-subtext0">
-                <time datetime={frontmatter.pubDate}>
-                    {formatDate(new Date(frontmatter.pubDate))}
-                </time>
-            </div>
+        <article>
+            <header class="mb-10 pb-8 border-b border-line">
+                <h1 class="font-serif text-[2.75rem] font-normal text-base leading-[1.2] mb-4">
+                    {frontmatter.title}
+                </h1>
+                <div class="text-[0.8rem] tracking-[0.1em] text-muted mb-3">
+                    <time datetime={frontmatter.pubDate}>
+                        {formatDate(new Date(frontmatter.pubDate))}
+                    </time>
+                </div>
+                {
+                    frontmatter.tags && (
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            {frontmatter.tags.map((tag: string) => (
+                                <span class="text-[0.75rem] tracking-[0.05em] text-muted bg-surface-2 border border-line py-[0.2rem] px-[0.6rem] rounded-sm">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    )
+                }
+            </header>
+
             {
-                frontmatter.tags && (
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        {frontmatter.tags.map((tag: string) => (
-                            <span class="bg-ctp-surface0 px-2 py-1 rounded text-xs text-ctp-subtext1">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
+                frontmatter.image && (
+                    <img
+                        src={frontmatter.image.url}
+                        alt={frontmatter.image.alt}
+                        class="w-full rounded mb-8"
+                    />
                 )
             }
-        </header>
 
-        {
-            frontmatter.image && (
-                <img
-                    src={frontmatter.image.url}
-                    alt={frontmatter.image.alt}
-                    class="w-full rounded-lg mb-8"
-                />
-            )
-        }
-
-        <div class="prose">
-            <slot />
-        </div>
-    </article>
+            <div class="prose">
+                <slot />
+            </div>
+        </article>
+    </div>
 </Layout>
 
 <style>
-    /* Prose styling for Markdown content */
     .prose {
-        @reference text-ctp-text leading-relaxed;
+        color: var(--color-base);
+        line-height: 1.8;
+        font-size: 1.05rem;
     }
 
-    .prose :global(h1) {
-        @reference text-2xl font-bold text-ctp-mauve mt-8 mb-4;
-    }
-
-    .prose :global(h2) {
-        @reference text-xl font-bold text-ctp-mauve mt-8 mb-4;
-    }
-
-    .prose :global(h3) {
-        @reference text-lg font-bold text-ctp-mauve mt-6 mb-3;
-    }
-
+    .prose :global(h1),
+    .prose :global(h2),
+    .prose :global(h3),
     .prose :global(h4) {
-        @reference text-base font-bold text-ctp-mauve mt-4 mb-2;
+        font-family: var(--font-serif);
+        font-weight: 400;
+        color: var(--color-base);
+        margin-top: 2.5rem;
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
     }
 
-    .prose :global(p) {
-        @reference mb-4 text-sm md:text-base;
-    }
+    .prose :global(h2) { font-size: 1.9rem; }
+    .prose :global(h3) { font-size: 1.5rem; }
+    .prose :global(h4) { font-size: 1.2rem; }
+
+    .prose :global(p) { margin-bottom: 1.4rem; }
 
     .prose :global(a) {
-        @reference text-ctp-mauve hover:underline;
+        color: var(--color-accent);
+        text-decoration: underline;
+        text-underline-offset: 2px;
     }
+
+    .prose :global(a:hover) { color: var(--color-base); }
 
     .prose :global(strong) {
-        @reference font-bold text-ctp-text;
+        font-weight: 600;
+        color: var(--color-base);
     }
 
-    .prose :global(em) {
-        @reference italic;
-    }
+    .prose :global(em) { font-style: italic; }
 
-    .prose :global(ul) {
-        @reference list-disc list-inside mb-4 space-y-1 text-sm md:text-base;
-    }
-
+    .prose :global(ul),
     .prose :global(ol) {
-        @reference list-decimal list-inside mb-4 space-y-1 text-sm md:text-base;
+        margin-bottom: 1.4rem;
+        padding-left: 1.5rem;
     }
 
-    .prose :global(li) {
-        @reference text-ctp-text;
-    }
+    .prose :global(ul) { list-style: disc; }
+    .prose :global(ol) { list-style: decimal; }
+
+    .prose :global(li) { margin-bottom: 0.4rem; }
 
     .prose :global(blockquote) {
-        @reference border-l-4 border-ctp-mauve pl-4 italic text-ctp-subtext0 my-4;
+        border-left: 3px solid var(--color-accent);
+        padding-left: 1.25rem;
+        margin: 1.5rem 0;
+        color: var(--color-muted);
+        font-style: italic;
     }
 
     .prose :global(code) {
-        @reference bg-ctp-surface0 px-1.5 py-0.5 rounded text-sm text-ctp-mauve font-mono;
+        background: var(--color-surface-2);
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.875em;
+        color: var(--color-accent);
+        font-family: monospace;
     }
 
     .prose :global(pre) {
-        @reference bg-ctp-mantle p-4 rounded-lg overflow-x-auto my-4;
+        background: var(--color-surface-3);
+        border: 1px solid var(--color-line);
+        padding: 1.25rem;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin: 1.5rem 0;
     }
 
     .prose :global(pre code) {
-        @reference bg-transparent p-0 text-ctp-text;
+        background: transparent;
+        padding: 0;
+        color: var(--color-base);
+        font-size: 0.9rem;
     }
 
     .prose :global(hr) {
-        @reference border-ctp-surface0 my-8;
+        border: none;
+        border-top: 1px solid var(--color-line);
+        margin: 2.5rem 0;
     }
 
     .prose :global(img) {
-        @reference rounded-lg my-4;
+        border-radius: 4px;
+        margin: 1.5rem 0;
+        max-width: 100%;
     }
 
     .prose :global(table) {
-        @reference w-full my-4 text-sm;
+        width: 100%;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+        border-collapse: collapse;
     }
 
     .prose :global(th) {
-        @reference bg-ctp-surface0 px-4 py-2 text-left font-semibold text-ctp-text;
+        background: var(--color-surface-2);
+        padding: 0.6rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--color-base);
+        border-bottom: 1px solid var(--color-line);
     }
 
     .prose :global(td) {
-        @reference border-t border-ctp-surface0 px-4 py-2;
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid var(--color-surface-2);
+        color: var(--color-base);
     }
 </style>

@@ -1,140 +1,86 @@
 ---
 import { Icon } from "astro-icon/components";
-import button from "../assets/button/button.gif";
 import { Image } from "astro:assets";
-import ottoLabsLogo from "../assets/logos/ottolabs.png"
+import ottoLabsLogo from "../assets/logos/ottolabs.png";
 import uwaterlooLogo from "../assets/logos/uwaterloo.svg";
 import eurekahacksLogo from "../assets/logos/eurekahacks2025.svg";
 import counterspell from "../assets/logos/counterspell.png";
 import HackathonList from "./HackathonList.astro";
 ---
 
-<h1 class="text-xl md:text-2xl lg:text-3xl font-bold pt-12 text-ctp-mauve">About Me</h1>
-<p class="pt-2 text-sm md:text-base leading-relaxed">
-    I’m a first-year Math student at the University of Waterloo pursuing software engineering. I
-    have experience building full-stack applications, with a focus on backend systems.
-</p>
-
-<h1 class="pt-8 font-bold text-lg md:text-xl">Currently:</h1>
-<ul class="list-none mt-3 space-y-2">
-  <li class="flex items-start gap-3 pl-0 sm:pl-2">
-    <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-    />
-    <span class="flex flex-wrap items-center text-sm md:text-base"
-    >Incoming Software Engineering Intern @&nbsp;<span class="inline-flex items-center flex-shrink-0"><Image
-                        src={ottoLabsLogo}
-                        alt="Otto Labs Logo"
-                        loading="eager"
-                        class="h-4 w-4 mr-1"
-                /><a
-            href="https://ottosr.com/"
-            class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium"
-            target="_blank"
-            rel="noopener noreferrer"
-    >Otto Labs</a></span></span
-    >
-  </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="flex items-center text-sm md:text-base"
-            >Studying Mathematics @ <span class="inline-block">
-                <Image
-                    src={uwaterlooLogo}
-                    alt="University of Waterloo Logo"
-                    loading="eager"
-                    class="h-4 w-4 ml-2 mr-1"
-                />
-            </span><a
-                href="https://uwaterloo.ca/"
-                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-                >UWaterloo
-            </a></span
-        >
-    </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="text-sm md:text-base"
-            >Learning about machine learning, AI, and systems programming</span
-        >
-    </li>
-</ul>
-
-<h1 class="pt-8 font-bold text-lg md:text-xl">Previously:</h1>
-<ul class="list-none mt-3 space-y-2">
-    <HackathonList />
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="text-sm md:text-base flex items-center">
-            Director of Tech @ <span class="inline-block">
-                <Image
-                    src={eurekahacksLogo}
-                    alt="EurekaHACKS 2025 Logo"
-                    loading="eager"
-                    class="h-4 w-4 ml-2 mr-1"
-                />
-            </span><a
-                href="https://2025.eurekahacks.ca/"
-                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-                >EurekaHACKS
-            </a>
-        </span>
-    </li>
-    <li class="flex items-start gap-3 pl-0 sm:pl-2">
-        <Icon
-            name="iconamoon--arrow-right-2-bold"
-            class="w-4 h-4 md:w-5 md:h-5 text-ctp-mauve flex-shrink-0 mt-1"
-            aria-hidden="true"
-        />
-        <span class="flex items-center text-sm md:text-base">
-            Organizer @ <span class="inline-block">
-                <Image
-                    src={counterspell}
-                    alt="Counterspell Logo"
-                    loading="eager"
-                    class="h-4 w-4 ml-2 mr-1"
-                />
-            </span><a
-                href="https://counterspell.hackclub.com/toronto"
-                class="underline duration-200 hover:decoration-ctp-subtext0 decoration-ctp-surface2 font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Counterspell Toronto
-            </a>
-        </span>
-    </li>
-</ul>
-
-<div class="mt-12">
-    <h2 class="text-lg md:text-xl font-bold text-ctp-mauve">Guestbook</h2>
-    <p class="pt-2 text-sm md:text-base leading-relaxed">
-        Feel free to leave a message in my <a
-            href="/guestbook"
-            class="text-ctp-mauve hover:underline font-medium">guestbook</a
-        >.
+<section class="text-lg leading-[1.7] text-base">
+    <h1 class="font-serif text-[2rem] font-normal text-accent mb-4">About Me</h1>
+    <p class="mb-10 max-w-2xl">
+        I'm a first-year Math student at the University of Waterloo pursuing software engineering. I
+        have experience building full-stack applications, with a focus on backend systems.
     </p>
-</div>
 
-<!--<div class="pt-16">-->
-<!--    <a href="https://aaronye.dev" target="_blank" rel="noreferrer noopener">-->
-<!--        <img src={button.src} alt="Aaron's 88x31 button" />-->
-<!--    </a>-->
-<!--</div>-->
+    <h2 class="font-serif text-2xl font-normal text-accent mt-10 mb-5">Currently</h2>
+    <ul class="list-none p-0 m-0 flex flex-col gap-3">
+        <li class="flex items-center gap-3">
+            <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+            <span
+                >Incoming Software Engineering Intern @
+                <Image src={ottoLabsLogo} alt="Otto Labs" class="w-4 h-4 inline-block align-middle mx-1" />
+                <a
+                    href="https://ottosr.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >Otto Labs</a
+                >
+            </span>
+        </li>
+        <li class="flex items-center gap-3">
+            <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+            <span
+                >Studying Mathematics @
+                <Image src={uwaterlooLogo} alt="UWaterloo" class="w-4 h-4 inline-block align-middle mx-1" />
+                <a
+                    href="https://uwaterloo.ca/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >UWaterloo</a
+                >
+            </span>
+        </li>
+        <li class="flex items-center gap-3">
+            <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+            <span>Learning about machine learning, AI, and systems programming</span>
+        </li>
+    </ul>
+
+    <h2 class="font-serif text-2xl font-normal text-accent mt-10 mb-5">Previously</h2>
+    <ul class="list-none p-0 m-0 flex flex-col gap-3">
+        <HackathonList />
+        <li class="flex items-center gap-3">
+            <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+            <span
+                >Director of Tech @
+                <Image src={eurekahacksLogo} alt="EurekaHACKS" class="w-4 h-4 inline-block align-middle mx-1" />
+                <a
+                    href="https://2025.eurekahacks.ca/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >EurekaHACKS</a
+                >
+            </span>
+        </li>
+        <li class="flex items-center gap-3">
+            <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+            <span
+                >Organizer @
+                <Image src={counterspell} alt="Counterspell" class="w-4 h-4 inline-block align-middle mx-1" />
+                <a
+                    href="https://counterspell.hackclub.com/toronto"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >Counterspell Toronto</a
+                >
+            </span>
+        </li>
+    </ul>
+</section>

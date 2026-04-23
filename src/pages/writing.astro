@@ -1,8 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { Icon } from "astro-icon/components";
 
-// Get all blog posts from the writing folder
 const posts = Object.values(import.meta.glob("./writing/*.md", { eager: true })) as {
     frontmatter: {
         title: string;
@@ -11,9 +9,9 @@ const posts = Object.values(import.meta.glob("./writing/*.md", { eager: true }))
         tags?: string[];
     };
     url: string;
+    rawContent?: () => string;
 }[];
 
-// Sort posts by date (newest first)
 const sortedPosts = posts.sort((a, b) => {
     const dateA = new Date(a.frontmatter.pubDate);
     const dateB = new Date(b.frontmatter.pubDate);
@@ -24,57 +22,48 @@ const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
         year: "numeric",
         month: "long",
-        day: "numeric",
-    }).format(date);
+    })
+        .format(date)
+        .toUpperCase();
+};
+
+const getReadTime = (content: string) => {
+    const words = content.split(/\s+/).length;
+    const minutes = Math.ceil(words / 200);
+    return `${minutes} MIN`;
 };
 ---
 
 <Layout>
-    <h1 class="text-xl md:text-2xl lg:text-3xl pt-12 font-bold text-ctp-mauve">Writing</h1>
-
-    <div class="mt-8 space-y-6">
-        {
-            sortedPosts.length === 0 ? (
-                <p class="text-ctp-subtext0">No posts yet. Check back soon!</p>
-            ) : (
-                sortedPosts.map((post) => (
-                    <a href={post.url} class="block group">
-                        <article class="bg-ctp-mantle rounded-lg p-5 transition-all duration-200 hover:bg-ctp-mantle/50 border border-transparent hover:border-ctp-mauve">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="flex-1">
-                                    <h2 class="text-lg font-semibold text-ctp-text group-hover:text-ctp-mauve transition-colors duration-200">
-                                        {post.frontmatter.title}
-                                    </h2>
-                                    <p class="mt-2 text-sm text-ctp-subtext0 line-clamp-2">
-                                        {post.frontmatter.description}
-                                    </p>
-                                    <div class="mt-3 flex items-center gap-4 text-xs text-ctp-overlay0">
-                                        <time datetime={post.frontmatter.pubDate}>
-                                            {formatDate(new Date(post.frontmatter.pubDate))}
-                                        </time>
-                                        {post.frontmatter.tags && (
-                                            <div class="flex gap-2">
-                                                {post.frontmatter.tags
-                                                    .slice(0, 3)
-                                                    .map((tag: string) => (
-                                                        <span class="text-center bg-ctp-surface0 group-hover:bg-ctp-surface1 px-2 py-0.5 rounded text-ctp-subtext1 transition-colors duration-200">
-                                                            {tag}
-                                                        </span>
-                                                    ))}
-                                            </div>
-                                        )}
-                                    </div>
+    <div class="pt-20 pb-12 max-w-3xl mx-auto">
+        <h1 class="font-serif text-5xl font-normal text-accent mb-3 pb-4">Writing</h1>
+        <div class="flex flex-col">
+            {
+                sortedPosts.length === 0 ? (
+                    <p class="text-muted">No posts yet. Check back soon!</p>
+                ) : (
+                    sortedPosts.map((post) => (
+                        <a
+                            href={post.url}
+                            class="group no-underline block p-5 -mx-5 border-t border-line last:border-b hover:bg-surface-2 transition-colors duration-200"
+                        >
+                            <article>
+                                <div class="text-[0.8rem] tracking-[0.1em] text-muted mb-2 flex items-center gap-2">
+                                    <span>{formatDate(new Date(post.frontmatter.pubDate))}</span>
+                                    <span class="text-line">·</span>
+                                    <span>
+                                        {post.rawContent ? getReadTime(post.rawContent()) : "3 MIN"}
+                                    </span>
                                 </div>
-                                <Icon
-                                    name="iconamoon--arrow-right-2-bold"
-                                    class="w-5 h-5 text-ctp-overlay0 group-hover:text-ctp-mauve transition-colors duration-200 flex-shrink-0 mt-1"
-                                    aria-hidden="true"
-                                />
-                            </div>
-                        </article>
-                    </a>
-                ))
-            )
-        }
+                                <h2 class="font-serif text-[1.65rem] font-normal text-base mb-2 transition-colors duration-200 group-hover:text-accent">
+                                    {post.frontmatter.title}
+                                </h2>
+                                <p class="text-base leading-relaxed">{post.frontmatter.description}</p>
+                            </article>
+                        </a>
+                    ))
+                )
+            }
+        </div>
     </div>
 </Layout>

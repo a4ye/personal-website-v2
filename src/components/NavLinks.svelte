@@ -9,23 +9,29 @@
 
 <div class="flex gap-6">
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/"}
-        href="/">About</a
+        class="font-medium text-accent hover:text-base duration-200"
+        href="/#about"
+        on:click|preventDefault={() => {
+            const el = document.getElementById('about');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            else window.location.href = '/#about';
+        }}>About</a
     >
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/projects"}
-        href="/projects">Projects</a
+        class="font-medium text-accent hover:text-base duration-200"
+        href="/#projects"
+        on:click|preventDefault={() => {
+            const el = document.getElementById('projects');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            else window.location.href = '/#projects';
+        }}>Projects</a
     >
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/writing"}
+        class="font-medium text-accent hover:text-base duration-200"
         href="/writing">Writing</a
     >
     <a
-        class="font-medium hover:text-ctp-mauve-100 duration-200"
-        class:text-ctp-mauve={normalizedPath === "/guestbook"}
+        class="font-medium text-accent hover:text-base duration-200"
         href="/guestbook">Guestbook</a
     >
 </div>

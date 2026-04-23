@@ -1,10 +1,89 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import AboutSection from "../components/AboutSection.astro";
+import HeroBackground from "../components/HeroBackground.svelte";
+import NavLinks from "../components/NavLinks.svelte";
+import Contacts from "../components/Contacts.astro";
+import ProjectsSection from "../components/ProjectsSection.astro";
 ---
 
-<Layout>
-    <main>
-        <AboutSection />
-    </main>
+<Layout hideHeader>
+    <!-- Full-viewport hero section -->
+    <section class="hero-section relative min-h-screen flex flex-col">
+        <div class="absolute inset-0 z-[-1]">
+            <HeroBackground client:only="svelte" />
+        </div>
+        <!-- Hero navbar -->
+        <nav
+            class="hero-nav mx-auto flex max-w-6xl w-full items-center justify-between px-6 md:px-10 pt-8 relative z-20"
+        >
+            <a href="/" class="text-lg sm:text-xl font-serif">aaron ye</a>
+            <div class="flex items-center gap-6">
+                <NavLinks currentPath="/" client:idle />
+                <span class="hero-separator">|</span>
+                <Contacts />
+            </div>
+        </nav>
+
+        <!-- Centered name -->
+        <div class="flex-1 flex items-center justify-center -mt-20">
+            <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-serif tracking-wide text-base">
+                aaron ye
+            </h1>
+        </div>
+    </section>
+
+    <!-- About section -->
+    <section id="about" class="relative bg-surface">
+        <div class="flex justify-center max-w-4xl mx-auto px-6 md:px-10 py-32">
+            <AboutSection />
+        </div>
+    </section>
+
+    <!-- Projects section -->
+    <section class="relative bg-surface-2">
+        <div class="max-w-7xl mx-auto px-8 md:px-16 py-28">
+            <ProjectsSection />
+        </div>
+    </section>
+
+    <!-- Guestbook section -->
+    <section class="relative bg-surface">
+        <div class="max-w-[72rem] mx-auto px-6 md:px-10 py-20">
+            <h2 class="font-serif text-[2.5rem] font-normal text-accent mb-4">Guestbook</h2>
+            <p class="text-lg text-base">
+                Feel free to leave a message in my <a
+                    href="/guestbook"
+                    class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >guestbook</a
+                >.
+            </p>
+        </div>
+    </section>
 </Layout>
+
+<style is:global>
+    body {
+        background: transparent !important;
+    }
+</style>
+
+<style>
+    /* Override child component colors in the hero nav — these can't be done with inline Tailwind */
+    .hero-nav :global(a) {
+        color: var(--color-base) !important;
+    }
+
+    .hero-nav :global(a:hover) {
+        color: var(--color-accent) !important;
+    }
+
+    .hero-nav :global(svg) {
+        color: var(--color-base) !important;
+    }
+
+    .hero-nav :global(span),
+    .hero-separator {
+        color: var(--color-base);
+    }
+</style>

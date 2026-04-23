@@ -15,12 +15,10 @@ if (isNaN(page) || page < 1) {
     page = 1;
 }
 
-// Get total count first to clamp page
 const countResult = await countGuestbookEntries(db);
 const totalEntries = parseInt(countResult?.count || "0");
 const totalPages = Math.ceil(totalEntries / ENTRIES_PER_PAGE);
 
-// Clamp page to valid range before fetching
 if (totalPages > 0 && page > totalPages) {
     page = totalPages;
 }
@@ -29,7 +27,6 @@ const guestbookEntries = await getGuestbookEntriesPaginated(db, {
     offset: ((page - 1) * ENTRIES_PER_PAGE).toString(),
 });
 
-// Generate page numbers for pagination
 function getPageNumbers(current: number, total: number): (number | "...")[] {
     if (total <= 3) {
         return Array.from({ length: total }, (_, i) => i + 1);
@@ -38,17 +35,14 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
     const pages: (number | "...")[] = [];
 
     if (current === 1) {
-        // First page: show 1, 2, 3, ..., last
         pages.push(1, 2, 3);
         if (total > 4) pages.push("...");
         if (total > 3) pages.push(total);
     } else if (current === total) {
-        // Last page: show first, ..., last-2, last-1, last
         if (total > 3) pages.push(1);
         if (total > 4) pages.push("...");
         pages.push(total - 2, total - 1, total);
     } else {
-        // Middle: show first, ..., prev, current, next, ..., last
         if (current > 2) {
             pages.push(1);
             if (current > 3) pages.push("...");
@@ -65,259 +59,211 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 
 const miniPages = getPageNumbers(page, totalPages);
 
-const locale = new Intl.Locale("en-CA", {
-    hourCycle: "h23",
-});
-
-const dateFormat = new Intl.DateTimeFormat(locale, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    hour12: false,
-});
-
-const formatDate = (date: Date | string) => {
-    // Accepts Date or string, parses as local time
-    const d = typeof date === "string" ? new Date(date) : date;
-    return dateFormat.format(d);
-};
-
-// Sanitize HTML and convert newlines to <br> for safe rendering
 const formatMessage = (message: string) => {
     const sanitized = sanitizeHtml(message, { allowedTags: [], allowedAttributes: {} });
     return sanitized.replace(/\n/g, "<br>");
 };
+
+const pageBtnBase = "py-1 px-2 text-[0.9rem] no-underline rounded transition-colors duration-200";
+const pageBtnDefault = `${pageBtnBase} text-muted hover:bg-surface-2 hover:text-base`;
+const pageBtnActive = `${pageBtnBase} bg-accent text-surface font-medium hover:bg-accent hover:text-surface`;
+const pageBtnDisabled = `${pageBtnBase} text-line pointer-events-none`;
 ---
 
 <Layout>
-    <div>
-        <h1 class="text-xl md:text-2xl lg:text-3xl pt-12 font-bold text-ctp-mauve">
-            Leave a message!
-        </h1>
-    </div>
-    <form id="guestbook-form" class="mt-4" aria-label="Guestbook form">
-        <div class="flex flex-col">
-            <label for="guestbookName">Name: <span class="text-ctp-red">*</span></label>
-            <input
-                class="border-2 border-ctp-surface0 rounded mt-1 h-8 p-2 focus:outline-none hover:border-ctp-mauve-100 focus:border-ctp-mauve-100 duration-200"
-                type="text"
-                id="guestbookName"
-                name="name"
-                placeholder="Your Name"
-                required
-                aria-label="Name"
-            />
-        </div>
-        <div class="flex flex-col pt-4">
-            <label for="guestbookMessage">Message: <span class="text-ctp-red">*</span></label>
-            <textarea
-                class="border-2 border-ctp-surface0 transition-colors rounded mt-1 p-2 focus:outline-none hover:border-ctp-mauve-100 focus:border-ctp-mauve-100 duration-200"
-                id="guestbookMessage"
-                name="message"
-                placeholder="Leave a message..."
-                required
-                aria-label="Message"></textarea>
-        </div>
-        <button
-            id="submit-button"
-            class="rounded text-ctp-base font-semibold hover:bg-ctp-mauve-300 duration-200 cursor-pointer p-1 w-24 bg-ctp-mauve mt-6 flex items-center justify-center"
-            type="submit"
-            aria-label="Submit guestbook entry"
-        >
-            <span id="submit-text">Submit</span>
-            <img
-                id="submit-loading"
-                class="hidden"
-                width="24"
-                height="24"
-                src={loadingIcon.src}
-                alt="Loading..."
-                aria-label="Loading indicator"
-            />
-        </button>
-        <div class="flex flex-row">
-            <p
-                id="form-error"
-                class="pt-2 h-4 text-ctp-red"
-                aria-live="polite"
-                aria-label="Form error message"
-            >
-            </p>
-            <p
-                id="form-success"
-                class="pt-2 h-4 text-ctp-green"
-                aria-live="polite"
-                aria-label="Form success message"
-            >
-            </p>
-        </div>
-    </form>
-
-    <!-- Page info and mini paginator -->
-    {
-        totalEntries > 0 && (
-            <div
-                class="flex justify-between items-center pt-12"
-                data-pagination-container
-                aria-label="Pagination navigation"
-            >
-                <p
-                    class="text-ctp-subtext0"
-                    data-page-info
-                    data-total-entries={totalEntries}
-                    data-total-pages={totalPages}
-                    aria-label="Page and message count"
-                >
-                    Page {page} of {totalPages} ({totalEntries}
-                    {totalEntries === 1 ? "message" : "messages"})
-                </p>
-                {totalPages > 0 && (
-                    <div
-                        class="flex items-center gap-1"
-                        data-paginator
-                        aria-label="Page navigation"
-                    >
-                        <a
-                            href={page > 1 ? `?page=${page - 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === 1 ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
-                            aria-disabled={page === 1}
-                            aria-label="Previous page"
-                        >
-                            ←
-                        </a>
-                        {miniPages.map((p) =>
-                            p === "..." ? (
-                                <span class="text-sm text-ctp-subtext0 px-1" aria-hidden="true">
-                                    ...
-                                </span>
-                            ) : (
-                                <a
-                                    href={`?page=${p}`}
-                                    class={`px-2 py-1 rounded text-sm duration-200 ${p === page ? "bg-ctp-mauve text-ctp-base font-semibold" : "text-ctp-text hover:bg-ctp-surface0"}`}
-                                    aria-current={p === page ? "page" : undefined}
-                                    aria-label={`Go to page ${p}`}
-                                >
-                                    {p}
-                                </a>
-                            ),
-                        )}
-                        <a
-                            href={page < totalPages ? `?page=${page + 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === totalPages ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
-                            aria-disabled={page === totalPages}
-                            aria-label="Next page"
-                        >
-                            →
-                        </a>
-                    </div>
-                )}
-            </div>
-        )
-    }
-
-    <div
-        id="entries-container"
-        class="flex flex-col gap-4 pt-4"
-        aria-label="Guestbook entries list"
-    >
-        {
-            guestbookEntries.length === 0 ? (
-                <div
-                    class="text-center py-12 text-ctp-subtext0"
-                    data-empty-state
-                    aria-label="No messages state"
-                >
-                    <p class="text-lg">No messages yet.</p>
-                    <p>Be the first to leave a message!</p>
+    <div class="max-w-3xl mx-auto pt-20 pb-16">
+        <h1 class="font-serif text-5xl font-normal text-accent mb-3">Guestbook</h1>
+        <form id="guestbook-form" aria-label="Guestbook form">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm tracking-[0.06em] text-muted" for="guestbookName">
+                        Name <span class="text-muted">*</span>
+                    </label>
+                    <input
+                        class="bg-transparent border border-line rounded-md px-3.5 py-2.5 text-base outline-none transition-colors duration-200 w-full placeholder:text-muted hover:border-muted focus:border-muted"
+                        type="text"
+                        id="guestbookName"
+                        name="name"
+                        placeholder="Your name"
+                        required
+                        aria-label="Name"
+                    />
                 </div>
-            ) : (
-                guestbookEntries.map((entry) => (
-                    <div class="bg-ctp-mantle rounded p-4" aria-label="Guestbook entry">
-                        <div class="flex justify-between">
-                            <h1 class="font-semibold" aria-label="Entry author">
-                                {entry.name}
-                            </h1>
-                            <span
-                                class="guestbook-date"
-                                data-iso={entry.createdAt!}
-                                aria-label="Entry date"
-                            />
-                        </div>
-                        <p
-                            class="pt-4"
-                            set:html={formatMessage(entry.message)}
-                            aria-label="Entry message"
-                        />
-                    </div>
-                ))
-            )
-        }
-    </div>
-
-    <!-- Bottom page info and paginator -->
-    {
-        totalEntries > 0 && (
-            <div
-                class="flex justify-between items-center pt-8 pb-12"
-                data-pagination-container
-                aria-label="Pagination navigation"
-            >
-                <p class="text-ctp-subtext0" data-page-info aria-label="Page and message count">
-                    Page {page} of {totalPages} ({totalEntries}
-                    {totalEntries === 1 ? "message" : "messages"})
-                </p>
-                {totalPages > 0 && (
-                    <div
-                        class="flex items-center gap-1"
-                        data-paginator
-                        aria-label="Page navigation"
-                    >
-                        <a
-                            href={page > 1 ? `?page=${page - 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === 1 ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
-                            aria-disabled={page === 1}
-                            aria-label="Previous page"
-                        >
-                            ←
-                        </a>
-                        {miniPages.map((p) =>
-                            p === "..." ? (
-                                <span class="text-sm text-ctp-subtext0 px-1" aria-hidden="true">
-                                    ...
-                                </span>
-                            ) : (
-                                <a
-                                    href={`?page=${p}`}
-                                    class={`px-2 py-1 rounded text-sm duration-200 ${p === page ? "bg-ctp-mauve text-ctp-base font-semibold" : "text-ctp-text hover:bg-ctp-surface0"}`}
-                                    aria-current={p === page ? "page" : undefined}
-                                    aria-label={`Go to page ${p}`}
-                                >
-                                    {p}
-                                </a>
-                            ),
-                        )}
-                        <a
-                            href={page < totalPages ? `?page=${page + 1}` : undefined}
-                            class={`px-2 py-1 rounded text-sm ${page === totalPages ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}`}
-                            aria-disabled={page === totalPages}
-                            aria-label="Next page"
-                        >
-                            →
-                        </a>
-                    </div>
-                )}
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm tracking-[0.06em] text-muted" for="guestbookMessage">
+                        Message <span class="text-muted">*</span>
+                    </label>
+                    <textarea
+                        class="bg-transparent border border-line rounded-md px-3.5 py-2.5 text-base outline-none transition-colors duration-200 w-full placeholder:text-muted hover:border-muted focus:border-muted resize-y min-h-24"
+                        id="guestbookMessage"
+                        name="message"
+                        placeholder="Leave a message..."
+                        required
+                        aria-label="Message"></textarea>
+                </div>
             </div>
-        )
-    }
+            <div class="flex items-center justify-between mt-4 gap-4">
+                <div class="flex-1">
+                    <p id="form-error" class="text-[0.95rem] text-error m-0" aria-live="polite"></p>
+                    <p id="form-success" class="text-[0.95rem] text-accent m-0" aria-live="polite"></p>
+                </div>
+                <button
+                    id="submit-button"
+                    class="bg-accent text-surface border-0 rounded-md px-5 py-2.5 text-[0.95rem] cursor-pointer flex items-center gap-2 transition-colors duration-200 whitespace-nowrap shrink-0 hover:bg-base disabled:opacity-60 disabled:cursor-not-allowed"
+                    type="submit"
+                    aria-label="Submit guestbook entry"
+                >
+                    <span id="submit-text">Submit</span>
+                    <img
+                        id="submit-loading"
+                        class="hidden"
+                        width="20"
+                        height="20"
+                        src={loadingIcon.src}
+                        alt="Loading..."
+                    />
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-14">
+            {
+                totalEntries > 0 && (
+                    <div
+                        class="flex justify-between items-center pb-3"
+                        data-pagination-container
+                        aria-label="Pagination navigation"
+                    >
+                        <p
+                            class="text-[0.875rem] text-muted tracking-[0.04em] m-0"
+                            data-page-info
+                            data-total-entries={totalEntries}
+                            data-total-pages={totalPages}
+                        >
+                            Page {page} of {totalPages} · {totalEntries}{" "}
+                            {totalEntries === 1 ? "message" : "messages"}
+                        </p>
+                        {totalPages > 1 && (
+                            <div class="flex items-center gap-1" data-paginator aria-label="Page navigation">
+                                <a
+                                    href={page > 1 ? `?page=${page - 1}` : undefined}
+                                    class={page === 1 ? pageBtnDisabled : pageBtnDefault}
+                                    aria-disabled={page === 1}
+                                    aria-label="Previous page"
+                                >
+                                    ←
+                                </a>
+                                {miniPages.map((p) =>
+                                    p === "..." ? (
+                                        <span class="text-[0.9rem] text-line px-1" aria-hidden="true">
+                                            …
+                                        </span>
+                                    ) : (
+                                        <a
+                                            href={`?page=${p}`}
+                                            class={p === page ? pageBtnActive : pageBtnDefault}
+                                            aria-current={p === page ? "page" : undefined}
+                                        >
+                                            {p}
+                                        </a>
+                                    ),
+                                )}
+                                <a
+                                    href={page < totalPages ? `?page=${page + 1}` : undefined}
+                                    class={page === totalPages ? pageBtnDisabled : pageBtnDefault}
+                                    aria-disabled={page === totalPages}
+                                    aria-label="Next page"
+                                >
+                                    →
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+
+            <div id="entries-container" aria-label="Guestbook entries">
+                {
+                    guestbookEntries.length === 0 ? (
+                        <p class="text-muted py-8 border-t border-line m-0" data-empty-state>
+                            No messages yet. Be the first to leave one!
+                        </p>
+                    ) : (
+                        guestbookEntries.map((entry) => (
+                            <div class="py-6 border-t border-line last:border-b last:border-line" aria-label="Guestbook entry">
+                                <div class="flex justify-between items-baseline mb-[0.625rem] gap-4">
+                                    <span class="font-serif text-[1.2rem] text-accent">{entry.name}</span>
+                                    <span
+                                        class="text-[0.8rem] tracking-[0.08em] text-muted whitespace-nowrap guestbook-date"
+                                        data-iso={entry.createdAt!}
+                                        aria-label="Entry date"
+                                    />
+                                </div>
+                                <p class="text-base leading-[1.7] m-0" set:html={formatMessage(entry.message)} />
+                            </div>
+                        ))
+                    )
+                }
+            </div>
+
+            {
+                totalEntries > 0 && totalPages > 1 && (
+                    <div
+                        class="flex justify-between items-center pt-3 pb-0 border-t border-line"
+                        data-pagination-container
+                        aria-label="Pagination navigation"
+                    >
+                        <p class="text-[0.875rem] text-muted tracking-[0.04em] m-0" data-page-info>
+                            Page {page} of {totalPages} · {totalEntries}{" "}
+                            {totalEntries === 1 ? "message" : "messages"}
+                        </p>
+                        <div class="flex items-center gap-1" data-paginator aria-label="Page navigation">
+                            <a
+                                href={page > 1 ? `?page=${page - 1}` : undefined}
+                                class={page === 1 ? pageBtnDisabled : pageBtnDefault}
+                                aria-disabled={page === 1}
+                            >
+                                ←
+                            </a>
+                            {miniPages.map((p) =>
+                                p === "..." ? (
+                                    <span class="text-[0.9rem] text-line px-1" aria-hidden="true">
+                                        …
+                                    </span>
+                                ) : (
+                                    <a
+                                        href={`?page=${p}`}
+                                        class={p === page ? pageBtnActive : pageBtnDefault}
+                                        aria-current={p === page ? "page" : undefined}
+                                    >
+                                        {p}
+                                    </a>
+                                ),
+                            )}
+                            <a
+                                href={page < totalPages ? `?page=${page + 1}` : undefined}
+                                class={page === totalPages ? pageBtnDisabled : pageBtnDefault}
+                                aria-disabled={page === totalPages}
+                            >
+                                →
+                            </a>
+                        </div>
+                    </div>
+                )
+            }
+        </div>
+    </div>
 </Layout>
 
 <script>
     import { actions, isInputError } from "astro:actions";
 
-    // Simple HTML escape function for client-side sanitization
+    // Tailwind class strings for JS-generated DOM (must be full strings for content scanning)
+    const BTN_BASE = "py-1 px-2 text-[0.9rem] no-underline rounded transition-colors duration-200";
+    const BTN_DEFAULT = `${BTN_BASE} text-muted hover:bg-surface-2 hover:text-base`;
+    const BTN_ACTIVE = `${BTN_BASE} bg-accent text-surface font-medium hover:bg-accent hover:text-surface`;
+    const BTN_DISABLED = `${BTN_BASE} text-line pointer-events-none`;
+
     function escapeHtml(text: string): string {
         const div = document.createElement("div");
         div.textContent = text;
@@ -341,14 +287,9 @@ const formatMessage = (message: string) => {
     );
     const ENTRIES_PER_PAGE = 10;
 
-    // Sanitize HTML and optionally convert newlines to <br>
     function sanitize(text: string, preserveNewlines = false): string {
         let sanitized = escapeHtml(text);
-
-        if (preserveNewlines) {
-            sanitized = sanitized.replace(/\n/g, "<br>");
-        }
-
+        if (preserveNewlines) sanitized = sanitized.replace(/\n/g, "<br>");
         return sanitized;
     }
 
@@ -359,12 +300,8 @@ const formatMessage = (message: string) => {
     }
 
     function getPageNumbers(current: number, total: number): (number | "...")[] {
-        if (total <= 3) {
-            return Array.from({ length: total }, (_, i) => i + 1);
-        }
-
+        if (total <= 3) return Array.from({ length: total }, (_, i) => i + 1);
         const pages: (number | "...")[] = [];
-
         if (current === 1) {
             pages.push(1, 2, 3);
             if (total > 4) pages.push("...");
@@ -384,145 +321,80 @@ const formatMessage = (message: string) => {
                 pages.push(total);
             }
         }
-
         return pages;
     }
 
+    function formatDateLocal(iso: string): string {
+        const d = new Date(iso);
+        return d.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    }
+
+    function formatAllDatesToLocal() {
+        document.querySelectorAll(".guestbook-date").forEach((el) => {
+            const iso = el.getAttribute("data-iso");
+            if (iso) el.textContent = formatDateLocal(iso);
+        });
+    }
+
+    formatAllDatesToLocal();
+
+    const observer = new MutationObserver(() => formatAllDatesToLocal());
+    observer.observe(entriesContainer, { childList: true });
+
     function updatePagination() {
-        // Check if pagination containers exist in the DOM (not from initial query which may be stale)
         const existingContainers = document.querySelectorAll("[data-pagination-container]");
 
-        // If there are no pagination containers but we now have entries, create them
         if (existingContainers.length === 0 && totalEntries > 0) {
-            // Create top pagination container
             const topContainer = document.createElement("div");
-            topContainer.className = "flex justify-between items-center pt-12";
+            topContainer.className = "flex justify-between items-center pb-3";
             topContainer.setAttribute("data-pagination-container", "");
             topContainer.innerHTML = `
-                <p class="text-ctp-subtext0" data-page-info data-total-entries="${totalEntries}" data-total-pages="${totalPages}">
-                    Page ${currentPage} of ${totalPages} (${totalEntries} ${totalEntries === 1 ? "message" : "messages"})
+                <p class="text-[0.875rem] text-muted tracking-[0.04em] m-0" data-page-info data-total-entries="${totalEntries}" data-total-pages="${totalPages}">
+                    Page ${currentPage} of ${totalPages} · ${totalEntries} ${totalEntries === 1 ? "message" : "messages"}
                 </p>
                 <div class="flex items-center gap-1" data-paginator></div>
             `;
             entriesContainer.before(topContainer);
-
-            // Create bottom pagination container
-            const bottomContainer = document.createElement("div");
-            bottomContainer.className = "flex justify-between items-center pt-8 pb-12";
-            bottomContainer.setAttribute("data-pagination-container", "");
-            bottomContainer.innerHTML = `
-                <p class="text-ctp-subtext0" data-page-info>
-                    Page ${currentPage} of ${totalPages} (${totalEntries} ${totalEntries === 1 ? "message" : "messages"})
-                </p>
-                <div class="flex items-center gap-1" data-paginator></div>
-            `;
-            entriesContainer.after(bottomContainer);
-
-            // Re-query the elements and update paginators
-            const newPaginatorElements = document.querySelectorAll(
-                "[data-paginator]",
-            ) as NodeListOf<HTMLDivElement>;
-            updatePaginatorElements(newPaginatorElements);
+            updatePaginatorElements(
+                document.querySelectorAll("[data-paginator]") as NodeListOf<HTMLDivElement>,
+            );
             return;
         }
 
-        // Re-query page info and paginator elements to get current state
-        const currentPageInfoElements = document.querySelectorAll(
-            "[data-page-info]",
-        ) as NodeListOf<HTMLParagraphElement>;
-        const currentPaginatorElements = document.querySelectorAll(
-            "[data-paginator]",
-        ) as NodeListOf<HTMLDivElement>;
-
-        // Update page info text
-        currentPageInfoElements.forEach((el) => {
-            el.textContent = `Page ${currentPage} of ${totalPages} (${totalEntries} ${totalEntries === 1 ? "message" : "messages"})`;
+        document.querySelectorAll("[data-page-info]").forEach((el) => {
+            el.textContent = `Page ${currentPage} of ${totalPages} · ${totalEntries} ${totalEntries === 1 ? "message" : "messages"}`;
         });
-
-        // Update paginators
-        updatePaginatorElements(currentPaginatorElements);
+        updatePaginatorElements(
+            document.querySelectorAll("[data-paginator]") as NodeListOf<HTMLDivElement>,
+        );
     }
 
     function updatePaginatorElements(elements: NodeListOf<HTMLDivElement>) {
         const miniPages = getPageNumbers(currentPage, totalPages);
-
         elements.forEach((paginator) => {
-            if (totalPages === 0) {
+            if (totalPages <= 1) {
                 paginator.innerHTML = "";
                 return;
             }
-
-            let html = `
-                <a href="${currentPage > 1 ? `?page=${currentPage - 1}` : "javascript:void(0)"}"
-                   class="px-2 py-1 rounded text-sm ${currentPage === 1 ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}"
-                   ${currentPage === 1 ? 'aria-disabled="true"' : ""}>
-                    ←
-                </a>
-            `;
-
+            let html = `<a href="${currentPage > 1 ? `?page=${currentPage - 1}` : "javascript:void(0)"}" class="${currentPage === 1 ? BTN_DISABLED : BTN_DEFAULT}" ${currentPage === 1 ? 'aria-disabled="true"' : ""}>←</a>`;
             miniPages.forEach((p) => {
                 if (p === "...") {
-                    html += `<span class="text-sm text-ctp-subtext0 px-1">...</span>`;
+                    html += `<span class="text-[0.9rem] text-line px-1">…</span>`;
                 } else {
-                    html += `
-                        <a href="?page=${p}"
-                           class="px-2 py-1 rounded text-sm duration-200 ${p === currentPage ? "bg-ctp-mauve text-ctp-base font-semibold" : "text-ctp-text hover:bg-ctp-surface0"}">
-                            ${p}
-                        </a>
-                    `;
+                    html += `<a href="?page=${p}" class="${p === currentPage ? BTN_ACTIVE : BTN_DEFAULT}">${p}</a>`;
                 }
             });
-
-            html += `
-                <a href="${currentPage < totalPages ? `?page=${currentPage + 1}` : "javascript:void(0)"}"
-                   class="px-2 py-1 rounded text-sm ${currentPage === totalPages ? "text-ctp-overlay0 cursor-not-allowed" : "text-ctp-text hover:bg-ctp-surface0 duration-200"}"
-                   ${currentPage === totalPages ? 'aria-disabled="true"' : ""}>
-                    →
-                </a>
-            `;
-
+            html += `<a href="${currentPage < totalPages ? `?page=${currentPage + 1}` : "javascript:void(0)"}" class="${currentPage === totalPages ? BTN_DISABLED : BTN_DEFAULT}" ${currentPage === totalPages ? 'aria-disabled="true"' : ""}>→</a>`;
             paginator.innerHTML = html;
         });
     }
 
-    // Format all .guestbook-date elements to local time zone on client
-    function formatAllDatesToLocal() {
-        const dateElements = document.querySelectorAll(".guestbook-date");
-        dateElements.forEach((el) => {
-            const iso = el.getAttribute("data-iso");
-            if (!iso) return;
-            const d = new Date(iso);
-            el.textContent = d.toLocaleString(undefined, {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "numeric",
-                minute: "numeric",
-                second: "numeric",
-                hour12: false,
-            });
-        });
-    }
-
-    // Run on load
-    formatAllDatesToLocal();
-
-    // Also run after a new entry is added
-    function observeNewEntries() {
-        const observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-                    formatAllDatesToLocal();
-                }
-            }
-        });
-        observer.observe(entriesContainer, { childList: true });
-    }
-    observeNewEntries();
-
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         const formData = new FormData(form);
 
         setLoading(true);
@@ -532,126 +404,101 @@ const formatMessage = (message: string) => {
         if (isInputError(result.error)) {
             formSuccess.textContent = "";
             if (result.error.fields.name) {
-                formError.textContent = "Name must between 1 and 32 characters.";
-                return;
+                formError.textContent = "Name must be between 1 and 32 characters.";
             } else if (result.error.fields.message) {
                 formError.textContent = "Message must be between 1 and 1024 characters.";
-                return;
             }
             return;
         }
 
         if (result.error) {
             formSuccess.textContent = "";
-            formError.textContent = result.error.message || "An unknown error occurred :(";
+            formError.textContent = result.error.message || "An unknown error occurred.";
             return;
         }
 
         if (!result.data) {
             formSuccess.textContent = "";
-            formError.textContent = "An unknown error occurred :(";
+            formError.textContent = "An unknown error occurred.";
             return;
         }
 
         formError.textContent = "";
-        formSuccess.textContent = "Successfully submitted!";
+        formSuccess.textContent = "Message submitted!";
         form.reset();
 
-        // Update pagination counts
         totalEntries++;
         totalPages = Math.ceil(totalEntries / ENTRIES_PER_PAGE);
-        currentPage = 1; // Go back to page 1
+        currentPage = 1;
         updatePagination();
 
-        // If we were on page 1, just prepend the new entry and remove the last if needed
-        // Otherwise, fetch page 1 entries from the server
         if (
             (currentPage === 1 && window.location.search === "") ||
             window.location.search === "?page=1"
         ) {
-            // Add new entry to the top of the list
             const emptyState = entriesContainer.querySelector("[data-empty-state]");
-            if (emptyState) {
-                emptyState.remove();
-            }
+            if (emptyState) emptyState.remove();
 
-            // Helper to decode HTML entities (server-side escaped) safely
-            function decodeEntities(encodedString: string): string {
+            function decodeEntities(encoded: string): string {
                 const textarea = document.createElement("textarea");
-                textarea.innerHTML = encodedString || "";
+                textarea.innerHTML = encoded || "";
                 return textarea.value;
             }
 
-            // Helper to create a paragraph element with preserved newlines
-            function createMessageParagraph(serverMessage: string): HTMLParagraphElement {
+            function createMessageEl(serverMessage: string): HTMLParagraphElement {
                 const p = document.createElement("p");
-                p.className = "pt-4";
-
-                if (!serverMessage) return p;
-
+                p.className = "text-base leading-[1.7] m-0";
                 const parts = serverMessage.split("\n");
                 parts.forEach((part: string, idx: number) => {
-                    const decoded = decodeEntities(part);
-                    p.appendChild(document.createTextNode(decoded));
+                    p.appendChild(document.createTextNode(decodeEntities(part)));
                     if (idx < parts.length - 1) p.appendChild(document.createElement("br"));
                 });
-
                 return p;
             }
 
-            const entryWrapper = document.createElement("div");
-            entryWrapper.className = "bg-ctp-mantle rounded p-4";
+            const entryEl = document.createElement("div");
+            entryEl.className = "py-6 border-t border-line last:border-b last:border-line";
 
             const header = document.createElement("div");
-            header.className = "flex justify-between";
+            header.className = "flex justify-between items-baseline mb-[0.625rem] gap-4";
 
-            const nameEl = document.createElement("h1");
-            nameEl.className = "font-semibold";
+            const nameEl = document.createElement("span");
+            nameEl.className = "font-serif text-[1.2rem] text-accent";
             nameEl.textContent = decodeEntities(result.data.name || "");
 
             const dateEl = document.createElement("span");
-            dateEl.className = "guestbook-date";
-            const dateValue = result.data.createdAt ? String(result.data.createdAt) : "";
-            dateEl.setAttribute("data-iso", dateValue);
-            // Will be formatted by formatAllDatesToLocal()
+            dateEl.className = "text-[0.8rem] tracking-[0.08em] text-muted whitespace-nowrap guestbook-date";
+            dateEl.setAttribute(
+                "data-iso",
+                result.data.createdAt ? String(result.data.createdAt) : "",
+            );
 
             header.appendChild(nameEl);
             header.appendChild(dateEl);
+            entryEl.appendChild(header);
+            entryEl.appendChild(createMessageEl(result.data.message || ""));
+            entriesContainer.prepend(entryEl);
 
-            const messageEl = createMessageParagraph(result.data.message || "");
-
-            entryWrapper.appendChild(header);
-            entryWrapper.appendChild(messageEl);
-
-            entriesContainer.prepend(entryWrapper);
-
-            // Remove the last entry if there are more than ENTRIES_PER_PAGE items
             const entries = entriesContainer.children;
-            if (entries.length > ENTRIES_PER_PAGE) {
-                entries[entries.length - 1].remove();
-            }
+            if (entries.length > ENTRIES_PER_PAGE) entries[entries.length - 1].remove();
         } else {
-            // Fetch page 1 entries and replace the container content
             try {
                 const response = await fetch("/api/guestbook-entries?page=1");
                 const data = await response.json();
-
                 if (data.entries) {
                     entriesContainer.innerHTML = data.entries
                         .map(
                             (entry: any) => `
-                        <div class="bg-ctp-mantle rounded p-4">
-                            <div class="flex justify-between">
-                                <h1 class="font-semibold">${sanitize(entry.name)}</h1>
-                                <span class="guestbook-date" data-iso="${entry.createdAt}"></span>
+                        <div class="py-6 border-t border-line last:border-b last:border-line">
+                            <div class="flex justify-between items-baseline mb-[0.625rem] gap-4">
+                                <span class="font-serif text-[1.2rem] text-accent">${sanitize(entry.name)}</span>
+                                <span class="text-[0.8rem] tracking-[0.08em] text-muted whitespace-nowrap guestbook-date" data-iso="${entry.createdAt}"></span>
                             </div>
-                            <p>${sanitize(entry.message, true)}</p>
+                            <p class="text-base leading-[1.7] m-0">${sanitize(entry.message, true)}</p>
                         </div>
                     `,
                         )
                         .join("");
-
-                    // Update URL without reloading
                     window.history.pushState({}, "", "/guestbook");
                 }
             } catch (error) {
@@ -660,7 +507,7 @@ const formatMessage = (message: string) => {
         }
 
         setTimeout(() => {
-            formError.textContent = "";
+            formSuccess.textContent = "";
         }, 3000);
     });
 </script>

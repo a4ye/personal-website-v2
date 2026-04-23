@@ -1,0 +1,125 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import dimeDefenderImg from "../assets/projects/dime-defender.jpg";
+import eurekaHacksImg from "../assets/projects/eureka-hacks-2025.png";
+import mrGooseImg from "../assets/projects/mr-goose.png";
+import igniteAiImg from "../assets/projects/ignite-ai.png";
+import gdtrisImg from "../assets/projects/gdtris.png";
+import type { ImageMetadata } from "astro";
+
+interface Project {
+    title: string;
+    description: string;
+    tech: string[];
+    year: number;
+    github?: string;
+    live?: string;
+    image: ImageMetadata;
+}
+
+const projects: Project[] = [
+    {
+        title: "Dime Defender",
+        description:
+            "A Chrome extension that creates an Ace Attorney–style debate between two AI lawyers to debate purchases at Amazon and Shopify checkout pages. Finalist @ Hack the North 2024.",
+        tech: ["Plasmo", "JavaScript", "Svelte"],
+        year: 2024,
+        github: "https://github.com/aryanp05/hackthenorth24",
+        live: "https://devpost.com/software/budget-defender",
+        image: dimeDefenderImg,
+    },
+    {
+        title: "EurekaHACKS 2025 Website",
+        description:
+            "The website for the 2025 iteration of EurekaHACKS. Includes an application system, hacker dashboard, and admin dashboard.",
+        tech: ["TypeScript", "Next.js", "PostgreSQL", "AWS"],
+        year: 2025,
+        github: "https://github.com/EurekaHackathon/EurekaHACKS-2025",
+        live: "https://2025.eurekahacks.ca/",
+        image: eurekaHacksImg,
+    },
+    {
+        title: "Mr. Goose",
+        description:
+            "An AI-powered VSCode extension that assists beginners with coding while still encouraging learning through problem-solving. First place and best developer tool @ JAMHacks 2025.",
+        tech: ["TypeScript", "VSCode Extension", "Elysia.js"],
+        year: 2025,
+        github: "https://github.com/a4ye/jamhacks-2025",
+        image: mrGooseImg,
+    },
+    {
+        title: "Ignite AI",
+        description:
+            "A webapp inspired by Infinite Craft that lets people explore different career pathways. Honourable-mention @ NSBEHacks 2024.",
+        tech: ["SvelteKit", "PocketBase"],
+        year: 2024,
+        github: "https://github.com/danielp1218/IgniteAI",
+        live: "https://devpost.com/software/ignite-tkhjbw",
+        image: igniteAiImg,
+    },
+    {
+        title: "GDTris",
+        description: "A modern Tetris game made in Godot.",
+        tech: ["Godot", "GDScript"],
+        year: 2024,
+        github: "https://github.com/a4ye/gdtris",
+        live: "https://a4ye.github.io/gdtris/",
+        image: gdtrisImg,
+    },
+];
+---
+
+<section id="projects">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 md:gap-12 mb-16">
+        <div class="flex-1">
+            <span class="text-[0.85rem] tracking-[0.15em] text-muted flex items-center gap-3 mb-5 before:content-[''] before:w-8 before:h-px before:bg-muted">
+                Projects
+            </span>
+            <h2 class="font-serif text-[3.5rem] font-normal text-accent leading-[1.15] max-w-[28rem]">
+                A collection of some of the things I've made.
+            </h2>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12">
+        {
+            projects.map((project, index) => (
+                <div class={index % 2 === 1 ? "md:mt-16" : ""}>
+                    <a
+                        href={project.live || project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group block no-underline"
+                    >
+                        <div class="overflow-hidden rounded-lg mb-6">
+                            <Image
+                                src={project.image}
+                                alt={project.title}
+                                class="w-full h-auto aspect-[4/3] object-cover transition-transform duration-[400ms] group-hover:scale-[1.03]"
+                                loading={index < 2 ? "eager" : "lazy"}
+                            />
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[0.9rem] tracking-[0.05em] text-muted">{project.year}</span>
+                            <Icon
+                                name="iconoir--arrow-up-right"
+                                class="w-5 h-5 text-accent transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                aria-hidden="true"
+                            />
+                        </div>
+                        <h3 class="font-serif text-[2rem] font-normal text-accent mb-4">{project.title}</h3>
+                    </a>
+                    <p class="text-[1.05rem] text-base leading-[1.7] mb-5">{project.description}</p>
+                    <div class="flex flex-wrap gap-2.5">
+                        {project.tech.map((t) => (
+                            <span class="text-[0.8rem] py-1.5 px-3.5 border border-line rounded-md text-muted">{t}</span>
+                        ))}
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+
+    <hr class="mt-16 border-0 border-t border-line" />
+</section>
