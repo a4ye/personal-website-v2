@@ -23,14 +23,13 @@ const formatDate = (date: Date) => {
         year: "numeric",
         month: "long",
     })
-        .format(date)
-        .toUpperCase();
+        .format(date);
 };
 
 const getReadTime = (content: string) => {
     const words = content.split(/\s+/).length;
     const minutes = Math.ceil(words / 200);
-    return `${minutes} MIN`;
+    return `${minutes} min`;
 };
 ---
 
@@ -52,7 +51,7 @@ const getReadTime = (content: string) => {
                                     <span>{formatDate(new Date(post.frontmatter.pubDate))}</span>
                                     <span class="text-line">·</span>
                                     <span>
-                                        {post.rawContent ? getReadTime(post.rawContent()) : "3 MIN"}
+                                        {post.rawContent ? getReadTime(post.rawContent()) : "3 min"}
                                     </span>
                                 </div>
                                 <h2 class="font-serif text-[1.65rem] font-normal text-base mb-2 transition-colors duration-200 group-hover:text-accent">
