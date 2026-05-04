@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import "@fontsource/figtree";
-import "@fontsource/cormorant-garamond/400.css";
+import "@fontsource/petrona/400.css";
 import Footer from "../components/Footer.astro";
 import NavBar from "../components/NavBar.astro";
 
@@ -42,7 +42,7 @@ const env = import.meta.env.PUBLIC_ENV as string;
                             <nav class="max-w-6xl mx-auto flex items-center justify-between px-6 md:px-10 py-8">
                                 <NavBar currentPath={Astro.url.pathname} />
                             </nav>
-                            <div class="h-px bg-line"></div>
+                            <div class="h-px bg-line" />
                             <div class="max-w-6xl mx-auto px-6 md:px-10 pb-12">
                                 <slot />
                             </div>
