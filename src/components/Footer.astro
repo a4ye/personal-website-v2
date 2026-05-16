@@ -1,6 +1,7 @@
 ---
 import GithubCommit from "../components/GithubCommit.astro";
 import VisitsCounter from "./VisitsCounter.astro";
+import UwateringIcon from "../assets/icons/uwatering.svg?raw";
 
 const currentYear = new Date().getFullYear();
 ---
@@ -10,9 +11,29 @@ const currentYear = new Date().getFullYear();
     <div class="max-w-6xl mx-auto px-6 md:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted">
         <span>© {currentYear} Aaron Ye</span>
         <div class="flex items-center gap-4">
+            <div class="webring flex items-center gap-1.5">
+                <a href="https://cs.uwatering.com/#aaronye.dev?nav=prev" class="hover:text-accent transition-colors" aria-label="Previous site in webring">←</a>
+                <a href="https://cs.uwatering.com/#aaronye.dev" target="_blank" rel="noopener noreferrer" class="webring-icon" aria-label="UWatering CS Webring">
+                    <Fragment set:html={UwateringIcon} />
+                </a>
+                <a href="https://cs.uwatering.com/#aaronye.dev?nav=next" class="hover:text-accent transition-colors" aria-label="Next site in webring">→</a>
+            </div>
+            <span class="text-line">|</span>
             <GithubCommit />
             <span class="text-line">|</span>
             <VisitsCounter />
         </div>
     </div>
 </footer>
+
+<style>
+    .webring-icon :global(svg) {
+        width: 1.25rem;
+        height: auto;
+        color: var(--color-muted);
+        transition: color 0.2s;
+    }
+    .webring-icon:hover :global(svg) {
+        color: var(--color-accent);
+    }
+</style>
