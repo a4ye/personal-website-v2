@@ -1,5 +1,5 @@
 ---
-import GithubCommit from "../components/GithubCommit.astro";
+import GithubCommit from "../components/GithubCommit.tsx";
 import VisitsCounter from "./VisitsCounter.astro";
 import UwateringIcon from "../assets/icons/uwatering.svg?raw";
 
@@ -19,7 +19,7 @@ const currentYear = new Date().getFullYear();
                 <a href="https://cs.uwatering.com/#aaronye.dev?nav=next" class="hover:text-accent transition-colors" aria-label="Next site in webring">→</a>
             </div>
             <span class="text-line">|</span>
-            <GithubCommit />
+            <GithubCommit client:load />
             <span class="text-line">|</span>
             <VisitsCounter />
         </div>
