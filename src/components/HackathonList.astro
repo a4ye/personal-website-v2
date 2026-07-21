@@ -10,48 +10,135 @@ import apocalypse from "../assets/logos/apocalypse.png";
 import eurekahacksLogo from "../assets/logos/eurekahacks2024.png";
 import alicehacksLogo from "../assets/logos/alicehacks.png";
 import focushacksLogo from "../assets/logos/focushacks.png";
+import hackthe6ixLogo from "../assets/logos/hackthe6ix.png";
 import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
 
 const hackathons = [
-    { name: "NSBEHacks 2026", logo: nsbehacks2026Logo, link: "https://nsbehacksuoft.ca/", result: "1st Place Ripple Track" },
-    { name: "Hack the North 2025", logo: htn2025Logo, link: "https://hackthenorth.com/", result: "Finalist" },
-    { name: "JAMHacks 2025", logo: jamhacksLogo, link: "https://jamhacks.ca/", result: "1st Place Overall" },
-    { name: "NSBEHacks 2025", logo: nsbehacks2025Logo, link: "https://nsbehacksuoft.ca/", result: "2nd Place Overall" },
-    { name: "Hack the Valley 2024", logo: htv2024, link: "https://hackthevalley.io/", result: "ICP Award" },
-    { name: "Hack the North 2024", logo: htn2024Logo, link: "https://2024.hackthenorth.com/", result: "Finalist" },
-    { name: "STEMist Hacks 2024", logo: stemist, link: "https://www.joinstemist.org/", result: "First Place", invert: true },
-    { name: "Apocalypse 2024", logo: apocalypse, link: "https://apocalypse.hackclub.com/", result: "Top 7" },
-    { name: "EurekaHACKS 2024", logo: eurekahacksLogo, link: "https://2024.eurekahacks.ca/", result: "First Place" },
-    { name: "FOCUS Hacks 2024", logo: focushacksLogo, link: "https://www.focusyouthorg.ca/focus-hacks", result: "First Place" },
-    { name: "NSBEHacks 2024", logo: nsbehacks2025Logo, link: "https://nsbehacksuoft.ca/", result: "Top 4" },
-    { name: "AliceHacks 2023", logo: alicehacksLogo, link: "https://alicehacks.devpost.com/", result: "Best Beginner Hack", invert: true },
+    {
+        name: "Hack the 6ix 2026",
+        logo: hackthe6ixLogo,
+        link: "https://hackthe6ix.com/",
+        result: "Best Use of Unifold",
+    },
+    {
+        name: "NSBEHacks 2026",
+        logo: nsbehacks2026Logo,
+        link: "https://nsbehacksuoft.ca/",
+        result: "1st Place Ripple Track",
+    },
+    {
+        name: "Hack the North 2025",
+        logo: htn2025Logo,
+        link: "https://hackthenorth.com/",
+        result: "Finalist",
+    },
+    {
+        name: "JAMHacks 2025",
+        logo: jamhacksLogo,
+        link: "https://jamhacks.ca/",
+        result: "1st Place Overall",
+    },
+    {
+        name: "NSBEHacks 2025",
+        logo: nsbehacks2025Logo,
+        link: "https://nsbehacksuoft.ca/",
+        result: "2nd Place Overall",
+    },
+    {
+        name: "Hack the Valley 2024",
+        logo: htv2024,
+        link: "https://hackthevalley.io/",
+        result: "ICP Award",
+    },
+    {
+        name: "Hack the North 2024",
+        logo: htn2024Logo,
+        link: "https://2024.hackthenorth.com/",
+        result: "Finalist",
+    },
+    {
+        name: "STEMist Hacks 2024",
+        logo: stemist,
+        link: "https://www.joinstemist.org/",
+        result: "First Place",
+        invert: true,
+    },
+    {
+        name: "Apocalypse 2024",
+        logo: apocalypse,
+        link: "https://apocalypse.hackclub.com/",
+        result: "Top 7",
+    },
+    {
+        name: "EurekaHACKS 2024",
+        logo: eurekahacksLogo,
+        link: "https://2024.eurekahacks.ca/",
+        result: "First Place",
+    },
+    {
+        name: "FOCUS Hacks 2024",
+        logo: focushacksLogo,
+        link: "https://www.focusyouthorg.ca/focus-hacks",
+        result: "First Place",
+    },
+    {
+        name: "NSBEHacks 2024",
+        logo: nsbehacks2025Logo,
+        link: "https://nsbehacksuoft.ca/",
+        result: "Top 4",
+    },
+    {
+        name: "AliceHacks 2023",
+        logo: alicehacksLogo,
+        link: "https://alicehacks.devpost.com/",
+        result: "Best Beginner Hack",
+        invert: true,
+    },
 ];
 ---
 
 <li>
     <details class="group">
         <summary class="cursor-pointer flex items-center gap-3 list-none text-base">
-            <Icon name="iconamoon--arrow-right-2-bold" class="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
-            <span>12x hackathon winner</span>
-            <span class="text-accent inline-flex transition-transform duration-200 group-open:rotate-180">
+            <Icon
+                name="iconamoon--arrow-right-2-bold"
+                class="w-4 h-4 text-accent shrink-0"
+                aria-hidden="true"
+            />
+            <span>13x hackathon winner</span>
+            <span
+                class="text-accent inline-flex transition-transform duration-200 group-open:rotate-180"
+            >
                 <Icon name="iconamoon--arrow-down-2" class="w-4 h-4" aria-hidden="true" />
             </span>
         </summary>
         <ul class="list-none p-0 mt-2 ml-7 flex flex-col gap-1.5 text-sm">
-            {hackathons.map((h) => (
-                <li class="flex items-center gap-2">
-                    <Icon name="mage--l-arrow-down-right" class="w-3 h-3 text-accent shrink-0" aria-hidden="true" />
-                    <Image src={h.logo} alt={h.name} class={`w-4 h-4 object-contain${h.invert ? " invert" : ""}`} />
-                    <a
-                        href={h.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
-                    >{h.name}</a>
-                    <span class="text-muted">— {h.result}</span>
-                </li>
-            ))}
+            {
+                hackathons.map((h) => (
+                    <li class="flex items-center gap-2">
+                        <Icon
+                            name="mage--l-arrow-down-right"
+                            class="w-3 h-3 text-accent shrink-0"
+                            aria-hidden="true"
+                        />
+                        <Image
+                            src={h.logo}
+                            alt={h.name}
+                            class={`w-4 h-4 object-contain${h.invert ? " invert" : ""}`}
+                        />
+                        <a
+                            href={h.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                        >
+                            {h.name}
+                        </a>
+                        <span class="text-muted">— {h.result}</span>
+                    </li>
+                ))
+            }
         </ul>
     </details>
 </li>
