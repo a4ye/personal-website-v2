@@ -1,9 +1,8 @@
 export const prerender = false;
 
 export async function GET() {
-    const apiUrl =
-        "https://api.github.com/repos/a4ye/personal-website-v2/commits?per_page=1";
-    const token = import.meta.env.GITHUB_TOKEN;
+    const apiUrl = "https://api.github.com/repos/a4ye/personal-website-v2/commits?per_page=1";
+    const token = import.meta.env.GITHUB_API_TOKEN;
 
     const response = await fetch(apiUrl, {
         headers: {
