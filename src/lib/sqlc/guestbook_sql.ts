@@ -76,3 +76,64 @@ export async function countGuestbookEntries(sql: Sql): Promise<CountGuestbookEnt
     };
 }
 
+export const getGuestbookEntryQuery = `-- name: GetGuestbookEntry :one
+select id, name, message, created_at
+from public.guestbook_entries
+where id = $1`;
+
+export interface GetGuestbookEntryArgs {
+    id: number;
+}
+
+export interface GetGuestbookEntryRow {
+    id: number;
+    name: string;
+    message: string;
+    createdAt: Date | null;
+}
+
+export async function getGuestbookEntry(sql: Sql, args: GetGuestbookEntryArgs): Promise<GetGuestbookEntryRow | null> {
+    const rows = await sql.unsafe(getGuestbookEntryQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        name: row[1],
+        message: row[2],
+        createdAt: row[3]
+    };
+}
+
+export const deleteGuestbookEntryQuery = `-- name: DeleteGuestbookEntry :one
+delete
+from public.guestbook_entries
+where id = $1
+returning id, name, message, created_at`;
+
+export interface DeleteGuestbookEntryArgs {
+    id: number;
+}
+
+export interface DeleteGuestbookEntryRow {
+    id: number;
+    name: string;
+    message: string;
+    createdAt: Date | null;
+}
+
+export async function deleteGuestbookEntry(sql: Sql, args: DeleteGuestbookEntryArgs): Promise<DeleteGuestbookEntryRow | null> {
+    const rows = await sql.unsafe(deleteGuestbookEntryQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        name: row[1],
+        message: row[2],
+        createdAt: row[3]
+    };
+}
+

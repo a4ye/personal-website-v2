@@ -4,8 +4,10 @@ import { insertGuestbookEntry } from "@/lib/sqlc/guestbook_sql.ts";
 import { incrementVisitsCount } from "@/lib/sqlc/counters_sql.ts";
 import { db } from "@/lib/database.ts";
 import { checkRateLimit } from "@/lib/rate-limit.ts";
+import { sendGuestbookNotification } from "@/lib/notify.ts";
 import sanitizeHtml from "sanitize-html";
 import { profanity } from "@2toad/profanity";
+import { waitUntil } from "@vercel/functions";
 
 // Rate limit config: 5 submissions per minute
 const RATE_LIMIT_CONFIG = {
@@ -99,10 +101,20 @@ export const server = {
             }
 
             try {
-                return await insertGuestbookEntry(db, {
+                const entry = await insertGuestbookEntry(db, {
                     name: sanitizedName,
                     message: sanitizedMessage,
                 });
+
+                if (entry) {
+                    waitUntil(
+                        sendGuestbookNotification(entry, context.url.origin).catch((error) =>
+                            console.error("Guestbook notification threw:", error),
+                        ),
+                    );
+                }
+
+                return entry;
             } catch (error) {
                 throw new ActionError({
                     code: "INTERNAL_SERVER_ERROR",

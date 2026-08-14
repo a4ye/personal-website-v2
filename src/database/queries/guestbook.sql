@@ -12,3 +12,14 @@ limit 10 offset $1;
 -- name: CountGuestbookEntries :one
 select count(*) as count
 from public.guestbook_entries;
+
+-- name: GetGuestbookEntry :one
+select *
+from public.guestbook_entries
+where id = $1;
+
+-- name: DeleteGuestbookEntry :one
+delete
+from public.guestbook_entries
+where id = $1
+returning *;

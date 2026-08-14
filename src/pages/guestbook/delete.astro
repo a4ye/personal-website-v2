@@ -1,0 +1,86 @@
+---
+export const prerender = false;
+import { getGuestbookEntry, deleteGuestbookEntry } from "@/lib/sqlc/guestbook_sql";
+import { verifyDeleteToken } from "@/lib/delete-token";
+import { db } from "@/lib/database";
+import Layout from "../../layouts/Layout.astro";
+import NotFound from "@/components/NotFound.astro";
+import sanitizeHtml from "sanitize-html";
+
+const isPost = Astro.request.method === "POST";
+const token = isPost
+    ? String((await Astro.request.formData()).get("token") ?? "")
+    : (Astro.url.searchParams.get("token") ?? "");
+
+const entryId = token ? verifyDeleteToken(token) : null;
+
+let heading = "";
+let detail = "";
+let entry = null;
+
+// Without a valid token this route must be indistinguishable from one that does not exist.
+if (entryId === null) {
+    Astro.response.status = 404;
+} else if (isPost) {
+    entry = await deleteGuestbookEntry(db, { id: entryId });
+    heading = entry ? "Entry deleted" : "Already deleted";
+    detail = entry
+        ? "The entry has been removed from the guestbook."
+        : "That entry no longer exists.";
+} else {
+    entry = await getGuestbookEntry(db, { id: entryId });
+    heading = entry ? "Delete this entry?" : "Already deleted";
+    detail = entry ? "This cannot be undone." : "That entry no longer exists.";
+}
+
+const formatMessage = (message: string) =>
+    sanitizeHtml(message, { allowedTags: [], allowedAttributes: {} }).replace(/\n/g, "<br>");
+---
+
+{
+    entryId === null ? (
+        <NotFound />
+    ) : (
+        <Layout>
+            <div class="max-w-3xl mx-auto pt-20 pb-16">
+                <h1 class="font-serif text-5xl font-normal text-accent mb-3">{heading}</h1>
+                <p class="text-muted mb-8">{detail}</p>
+
+                {entry && (
+                    <div class="py-6 border-t border-b border-line mb-8">
+                        <div class="flex justify-between items-baseline mb-[0.625rem] gap-4">
+                            <span class="font-serif text-[1.2rem] text-accent">{entry.name}</span>
+                            <span class="text-[0.8rem] tracking-[0.08em] text-muted whitespace-nowrap">
+                                {entry.createdAt?.toISOString().slice(0, 10)}
+                            </span>
+                        </div>
+                        <p
+                            class="text-base leading-[1.7] m-0"
+                            set:html={formatMessage(entry.message)}
+                        />
+                    </div>
+                )}
+
+                <div class="flex items-center gap-4">
+                    {entry && !isPost && (
+                        <form method="POST">
+                            <input type="hidden" name="token" value={token} />
+                            <button
+                                class="bg-error text-surface border-0 rounded-md px-5 py-2.5 text-[0.95rem] cursor-pointer transition-colors duration-200 hover:bg-base"
+                                type="submit"
+                            >
+                                Delete permanently
+                            </button>
+                        </form>
+                    )}
+                    <a
+                        href="/guestbook"
+                        class="text-muted no-underline text-[0.95rem] hover:text-base transition-colors duration-200"
+                    >
+                        Back to guestbook
+                    </a>
+                </div>
+            </div>
+        </Layout>
+    )
+}
