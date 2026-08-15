@@ -108,7 +108,10 @@ export const server = {
 
                 if (entry) {
                     waitUntil(
-                        sendGuestbookNotification(entry, context.url.origin).catch((error) =>
+                        sendGuestbookNotification(
+                            entry,
+                            context.site?.origin ?? context.url.origin,
+                        ).catch((error) =>
                             console.error("Guestbook notification threw:", error),
                         ),
                     );
