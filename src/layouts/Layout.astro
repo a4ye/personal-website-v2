@@ -23,11 +23,18 @@ const env = import.meta.env.PUBLIC_ENV as string;
         <title>Aaron Ye</title>
         {
             env === "PROD" && (
-                <script
-                    defer
-                    src="https://cloud.umami.is/script.js"
-                    data-website-id="b38508b6-617a-47cf-9743-2bf62ecdca50"
-                />
+                <>
+                    <script
+                        defer
+                        src="https://umami.aaronye.dev/script.js"
+                        data-website-id="080b93fa-53f1-4d87-bfef-1e57ea5cdb7c"
+                    />
+                    <script
+                        defer
+                        src="https://umami.aaronye.dev/recorder.js"
+                        data-website-id="080b93fa-53f1-4d87-bfef-1e57ea5cdb7c"
+                    />
+                </>
             )
         }
     </head>
