@@ -6,6 +6,7 @@ import eurekaHacksImg from "../assets/projects/eureka-hacks-2025.png";
 import mrGooseImg from "../assets/projects/mr-goose.png";
 import igniteAiImg from "../assets/projects/ignite-ai.png";
 import gdtrisImg from "../assets/projects/gdtris.png";
+import fernImg from "../assets/projects/fern.png";
 import type { ImageMetadata } from "astro";
 
 interface Project {
@@ -19,6 +20,16 @@ interface Project {
 }
 
 const projects: Project[] = [
+    {
+        title: "Fern",
+        description:
+            "A faster, smarter replacement for the job search spreadsheet. Paste a posting link and the company, role, location, and pay fill themselves in. Funnel, timeline, and Sankey views show where every application went.",
+        tech: ["TypeScript", "Next.js", "PostgreSQL", "Better Auth", "Bun"],
+        year: 2026,
+        github: "https://github.com/a4ye/fern",
+        live: "https://fern.aaronye.dev",
+        image: fernImg,
+    },
     {
         title: "Dime Defender",
         description:
