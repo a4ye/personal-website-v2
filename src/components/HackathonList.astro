@@ -1,5 +1,6 @@
 ---
 import nsbehacks2026Logo from "../assets/logos/nsbe2026.png";
+import htn2026Logo from "../assets/logos/htn2026.png";
 import htn2025Logo from "../assets/logos/htn2025.svg";
 import htn2024Logo from "../assets/logos/htn2024.png";
 import jamhacksLogo from "../assets/logos/jamhacks.png";
@@ -15,6 +16,12 @@ import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
 
 const hackathons = [
+    {
+        name: "Hack the North 2026",
+        logo: htn2026Logo,
+        link: "https://hackthenorth.com/",
+        result: "2nd Place Rox Track",
+    },
     {
         name: "Hack the 6ix 2026",
         logo: hackthe6ixLogo,
@@ -106,7 +113,7 @@ const hackathons = [
                 class="w-4 h-4 text-accent shrink-0"
                 aria-hidden="true"
             />
-            <span>13x hackathon winner</span>
+            <span>14x hackathon winner</span>
             <span
                 class="text-accent inline-flex transition-transform duration-200 group-open:rotate-180"
             >
