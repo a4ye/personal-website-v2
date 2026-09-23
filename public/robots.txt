@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /guestbook/delete
+
+Sitemap: https://aaronye.dev/sitemap-index.xml

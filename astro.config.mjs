@@ -12,6 +12,8 @@ import vercel from "@astrojs/vercel";
 
 import react from "@astrojs/react";
 
+import sitemap from "@astrojs/sitemap";
+
 export default defineConfig({
     site: "https://aaronye.dev",
     prefetch: true,
@@ -28,6 +30,13 @@ export default defineConfig({
         ],
     },
 
-    integrations: [svelte(), icon({ iconDir: "src/assets/icons" }), react()],
+    integrations: [
+        svelte(),
+        icon({ iconDir: "src/assets/icons" }),
+        react(),
+        sitemap({
+            filter: (page) => !page.includes("/guestbook/delete"),
+        }),
+    ],
     adapter: vercel(),
 });
