@@ -93,7 +93,7 @@ const projects: Project[] = [
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12 3xl:gap-x-20">
         {
             projects.map((project, index) => (
                 <div class={index % 2 === 1 ? "md:mt-16" : ""}>
@@ -107,7 +107,7 @@ const projects: Project[] = [
                             src={project.image}
                             alt={`Screenshot of ${project.title}`}
                             widths={[600, 900, 1200, 1600]}
-                            sizes="(min-width: 768px) 36rem, 100vw"
+                            sizes="(min-width: 130rem) 46rem, (min-width: 768px) 36rem, 100vw"
                             class="w-full h-auto aspect-[4/3] rounded-xl mb-6"
                             loading={index < 2 ? "eager" : "lazy"}
                         />

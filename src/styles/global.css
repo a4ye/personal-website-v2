@@ -14,5 +14,7 @@
     --color-error: #c06060;
     --font-serif: "Petrona", "Times New Roman", serif;
     --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+    /* 2080px: wider than a 1080p window, so only QHD+ screens match */
+    --breakpoint-3xl: 130rem;
 }
 
