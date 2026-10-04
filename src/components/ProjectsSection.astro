@@ -1,12 +1,13 @@
 ---
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
+// Card images are composed by scripts/project-art/compose.py
 import dimeDefenderImg from "../assets/projects/dime-defender.jpg";
-import eurekaHacksImg from "../assets/projects/eureka-hacks-2025.png";
-import mrGooseImg from "../assets/projects/mr-goose.png";
-import igniteAiImg from "../assets/projects/ignite-ai.png";
-import gdtrisImg from "../assets/projects/gdtris.png";
-import fernImg from "../assets/projects/fern.png";
+import eurekaHacksImg from "../assets/projects/eureka-hacks-2025.jpg";
+import mrGooseImg from "../assets/projects/mr-goose.jpg";
+import igniteAiImg from "../assets/projects/ignite-ai.jpg";
+import gdtrisImg from "../assets/projects/gdtris.jpg";
+import fernImg from "../assets/projects/fern.jpg";
 import type { ImageMetadata } from "astro";
 
 interface Project {
@@ -102,14 +103,14 @@ const projects: Project[] = [
                         rel="noopener noreferrer"
                         class="group block no-underline"
                     >
-                        <div class="overflow-hidden rounded-lg mb-6">
-                            <Image
-                                src={project.image}
-                                alt={project.title}
-                                class="w-full h-auto aspect-[4/3] object-cover transition-transform duration-[400ms] group-hover:scale-[1.03]"
-                                loading={index < 2 ? "eager" : "lazy"}
-                            />
-                        </div>
+                        <Image
+                            src={project.image}
+                            alt={`Screenshot of ${project.title}`}
+                            widths={[600, 900, 1200, 1600]}
+                            sizes="(min-width: 768px) 36rem, 100vw"
+                            class="w-full h-auto aspect-[4/3] rounded-xl mb-6"
+                            loading={index < 2 ? "eager" : "lazy"}
+                        />
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-[0.9rem] tracking-[0.05em] text-muted">
                                 {project.year}
