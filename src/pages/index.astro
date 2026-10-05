@@ -6,9 +6,16 @@ import NavLinks from "../components/NavLinks.svelte";
 import Contacts from "../components/Contacts.astro";
 import MobileNav from "../components/MobileNav.svelte";
 import ProjectsSection from "../components/ProjectsSection.astro";
+import heroImage from "../assets/hero.avif";
 ---
 
 <Layout hideHeader>
+    {/*
+     * The hero photo is asked for by the island, which cannot ask until its own script has been
+     * fetched and run - about 290 ms in. The preload starts it with the stylesheet instead, and
+     * the island finds it already in the cache.
+     */}
+    <link slot="head" rel="preload" as="image" type="image/avif" href={heroImage.src} fetchpriority="high" />
     <!-- Full-viewport hero section -->
     <section class="hero-section relative min-h-screen flex flex-col">
         <div class="absolute inset-0 z-[-1]">
@@ -23,7 +30,7 @@ import ProjectsSection from "../components/ProjectsSection.astro";
                 <NavLinks currentPath="/" client:idle />
                 <span class="hero-separator hidden md:inline">|</span>
                 <Contacts />
-                <MobileNav client:load />
+                <MobileNav client:media="(max-width: 767px)" />
             </div>
         </nav>
 

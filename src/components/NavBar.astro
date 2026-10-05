@@ -15,5 +15,5 @@ const { currentPath } = Astro.props;
     <NavLinks {currentPath} client:idle />
     <span class="hidden md:inline text-line">|</span>
     <Contacts />
-    <MobileNav client:load />
+    <MobileNav client:media="(max-width: 767px)" />
 </div>

@@ -37,6 +37,7 @@ const env = import.meta.env.PUBLIC_ENV as string;
                 </>
             )
         }
+        <slot name="head" />
     </head>
     <body class="bg-surface text-base font-sans">
         <div class="flex flex-col justify-between min-h-screen relative z-10">

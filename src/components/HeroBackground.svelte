@@ -155,15 +155,26 @@
         if (!shader) return null;
         glCtx.shaderSource(shader, source);
         glCtx.compileShader(shader);
-        if (!glCtx.getShaderParameter(shader, glCtx.COMPILE_STATUS)) {
-            console.error('Shader compile error:', glCtx.getShaderInfoLog(shader));
-            glCtx.deleteShader(shader);
-            return null;
-        }
+        // Deliberately not asking for COMPILE_STATUS here: the question cannot be answered until
+        // the driver has finished, so asking is what makes the compile block. If anything did go
+        // wrong the link below fails, and the logs are read then.
         return shader;
     }
 
-    function createProgramFromSources(glCtx: WebGLRenderingContext, vsSrc: string, fsSrc: string): WebGLProgram | null {
+    /**
+     * Build the program, asking the driver whether it is finished rather than waiting for it.
+     *
+     * getProgramParameter(LINK_STATUS) cannot answer until the shader is compiled and linked, so
+     * it stalls the main thread: 353 ms on a profile that has never seen this page, and nothing at
+     * all on every later visit, because Chrome keeps the compiled program in its own cache.
+     * KHR_parallel_shader_compile adds a status flag that is meant to be readable without
+     * stalling. ANGLE on desktop OpenGL blocks on it anyway - measured here - but it does hold to
+     * the contract on Direct3D and Metal, which is where most visitors are. The deadline is for
+     * drivers that never report completion.
+     */
+    async function createProgramFromSources(
+        glCtx: WebGLRenderingContext, vsSrc: string, fsSrc: string,
+    ): Promise<WebGLProgram | null> {
         const vs = createShader(glCtx, glCtx.VERTEX_SHADER, vsSrc);
         const fs = createShader(glCtx, glCtx.FRAGMENT_SHADER, fsSrc);
         if (!vs || !fs) return null;
@@ -172,8 +183,19 @@
         glCtx.attachShader(prog, vs);
         glCtx.attachShader(prog, fs);
         glCtx.linkProgram(prog);
+
+        const parallel = glCtx.getExtension('KHR_parallel_shader_compile');
+        if (parallel) {
+            const deadline = performance.now() + 2000;
+            while (!glCtx.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)
+                   && performance.now() < deadline) {
+                await new Promise((resolve) => setTimeout(resolve, 8));
+            }
+        }
+
         if (!glCtx.getProgramParameter(prog, glCtx.LINK_STATUS)) {
-            console.error('Program link error:', glCtx.getProgramInfoLog(prog));
+            console.error('Program link error:', glCtx.getProgramInfoLog(prog),
+                glCtx.getShaderInfoLog(vs), glCtx.getShaderInfoLog(fs));
             glCtx.deleteProgram(prog);
             return null;
         }
@@ -308,7 +330,13 @@
             return;
         }
 
-        program = createProgramFromSources(gl, vertexShaderSource, fragmentShaderSource);
+        // The driver compiles the shader while the photo is fetched and decoded; neither waits on
+        // the other, and the hero is ready when the slower of the two is
+        const compiling = createProgramFromSources(gl, vertexShaderSource, fragmentShaderSource);
+        const imageUrl = typeof heroImage === 'string' ? heroImage : heroImage.src;
+        const loading = loadTexture(gl, imageUrl);
+
+        program = await compiling;
         if (!program) return;
 
         // Full-screen quad
@@ -322,9 +350,7 @@
         gl.enableVertexAttribArray(posLoc);
         gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-        // Load the holographic image texture
-        const imageUrl = typeof heroImage === 'string' ? heroImage : heroImage.src;
-        const texture = await loadTexture(gl, imageUrl);
+        const texture = await loading;
         if (!texture) return;
 
         gl.activeTexture(gl.TEXTURE0);

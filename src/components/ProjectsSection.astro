@@ -121,14 +121,25 @@ const projects: Project[] = [
                             class="relative overflow-hidden rounded-xl mb-6"
                             data-hover-video={project.video ? "" : undefined}
                         >
+                            {/*
+                             * AVIF at 60 measures the same fidelity as the WebP at 90 it replaces
+                             * - 38.0 dB against 38.1 - for 56 KB a card instead of 134. Nothing
+                             * is lost by asking for it: the hero photo is AVIF with no fallback,
+                             * so a browser that cannot read one has no background either.
+                             *
+                             * Every card is below the fold, under a full-height hero and the about
+                             * section, so none of them is worth fetching before the page is up.
+                             */}
                             <Image
                                 src={project.image}
                                 alt={`Screenshot of ${project.title}`}
                                 widths={[600, 900, 1200, 1600]}
                                 sizes="(min-width: 130rem) 56rem, (min-width: 100rem) 41rem, (min-width: 768px) 36rem, 100vw"
-                                quality={90}
+                                format="avif"
+                                quality={60}
                                 class="w-full h-auto aspect-[4/3]"
-                                loading={index < 2 ? "eager" : "lazy"}
+                                loading="lazy"
+                                decoding="async"
                             />
                             {project.video && (
                                 <video

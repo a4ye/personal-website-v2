@@ -1,7 +1,7 @@
 ---
 import nsbehacks2026Logo from "../assets/logos/nsbe2026.png";
 import htn2026Logo from "../assets/logos/htn2026.png";
-import htn2025Logo from "../assets/logos/htn2025.svg";
+import htn2025Logo from "../assets/logos/htn2025.png";
 import htn2024Logo from "../assets/logos/htn2024.png";
 import jamhacksLogo from "../assets/logos/jamhacks.png";
 import nsbehacks2025Logo from "../assets/logos/nsbe2025.png";
@@ -129,9 +129,11 @@ const hackathons = [
                             class="w-3 h-3 text-accent shrink-0"
                             aria-hidden="true"
                         />
+                        {/* Drawn at 16 px; 32 is the retina copy and nothing beyond it is seen */}
                         <Image
                             src={h.logo}
                             alt={h.name}
+                            width={32}
                             class={`w-4 h-4 object-contain${h.invert ? " invert" : ""}`}
                         />
                         <a
