@@ -44,7 +44,7 @@ import ProjectsSection from "../components/ProjectsSection.astro";
 
     <!-- Projects section -->
     <section class="relative bg-surface-2">
-        <div class="max-w-7xl 3xl:max-w-[104rem] mx-auto px-6 md:px-16 py-16 md:py-28">
+        <div class="projects-scale max-w-7xl 3xl:max-w-[104rem] mx-auto px-6 md:px-16 py-16 md:py-28">
             <ProjectsSection />
         </div>
     </section>
@@ -87,5 +87,18 @@ import ProjectsSection from "../components/ProjectsSection.astro";
     .hero-nav :global(span),
     .hero-separator {
         color: var(--color-base);
+    }
+
+    /*
+     * The project cards carry screen recordings of real applications, and a card is only 544px
+     * wide at this container's default size, which renders the app's own text at around 5px.
+     * Zooming the section is the same thing as the reader pressing ctrl-+ on it: the cards, their
+     * text and the videos all come up together, and the browser picks a larger image candidate to
+     * match. Only once there is room for it - 1280px of container at 1.2 needs 1536px of viewport.
+     */
+    @media (min-width: 1600px) {
+        .projects-scale {
+            zoom: 1.2;
+        }
     }
 </style>

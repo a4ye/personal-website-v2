@@ -246,8 +246,12 @@ def specks(img, n, colour, area, size=(0.6, 2.2), alpha=(0.15, 0.7), seed=1, bok
     return screen(img, m[..., None] * rgb(colour))
 
 
-def finish(img, name, grain=0.016, grain_mask=None):
-    """Scale down to the output size, add film grain, dither and save."""
+def finish(img, name, grain=0.016, grain_mask=None, dither=0.0056):
+    """Scale down to the output size, add film grain, dither and save.
+
+    `dither` is a light, slightly coarse noise over the whole card, screenshots included. The
+    site resizes these images to 600-1200 px and re-encodes them, which averages away the
+    finer grain; without this layer, slow dark gradients come out in visible bands."""
     channels = [
         np.asarray(Image.fromarray(img[..., i].astype(np.float32), "F").resize((W, H), Image.LANCZOS))
         for i in range(3)
@@ -261,6 +265,8 @@ def finish(img, name, grain=0.016, grain_mask=None):
             Image.fromarray(grain_mask.astype(np.float32), "F").resize((W, H), Image.BILINEAR)
         )
     out = out + noise[..., None] * grain
+    coarse = gaussian_filter(rng.normal(0, 1, (H, W)).astype(np.float32), 0.9)
+    out = out + (coarse / coarse.std())[..., None] * dither
     out = out + rng.uniform(-0.5, 0.5, out.shape) / 255
     OUT.mkdir(parents=True, exist_ok=True)
     Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8)).save(
@@ -394,7 +400,8 @@ def mr_goose():
     img, alpha = place(img, win, flat(win.width, win.height, left, top), shadow=(50, -10, 30, 0.7))
 
     img = progressive_blur(img, smoothstep(0.8, 1.05, Y) * 0.8 + smoothstep(0.35, 0.0, X) * 0.5, 8 * SS)
-    img = mix(img, "#050302", smoothstep(0.55, 1.15, (1 - X) * 0.75 + Y * 0.45) * 0.75)
+    # Darken without a colour shift: a warm fade over the grey editor bands badly once compressed
+    img = img * (1 - smoothstep(0.55, 1.15, (1 - X) * 0.75 + Y * 0.45) * 0.75)[..., None]
     finish(img, "mr-goose", grain_mask=1 - alpha * 0.85)
 
 

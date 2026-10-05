@@ -1,11 +1,17 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import heroImage from "../assets/hero.png";
+    import heroImage from "../assets/hero.avif";
 
     let canvas: HTMLCanvasElement;
     let gl: WebGLRenderingContext | null = null;
     let animationFrameId: number = 0;
     let startTime: number = 0;
+    let pausedAt: number = 0;
+    let onScreen = true;
+    let observer: IntersectionObserver | null = null;
+    // getBoundingClientRect on every mouse move forces a layout; the canvas only moves on
+    // resize or scroll, so read it then instead.
+    let canvasRect: DOMRect | null = null;
     let program: WebGLProgram | null = null;
 
     // Mouse position (normalized 0-1, with smoothing)
@@ -112,20 +118,7 @@
             float amp2 = 0.23 * mix(0.2, 0.2 / (1.27 + 0.05), 0.25) * 0.2;
             vec2 finalUV = clamp(mix(uv1, liquify(uv1, 0.121, freq2, amp2, 0.0, center2), 0.08), 0.0, 1.0);
 
-            // Sample image texture with gaussian blur
-            vec2 texelSize = 1.0 / u_resolution;
-            float blurRadius = 1.5;
-
-            vec3 color = vec3(0.0);
-            color += texture2D(u_texture, finalUV + texelSize * vec2(-1.0, -1.0) * blurRadius).rgb * 0.0625;
-            color += texture2D(u_texture, finalUV + texelSize * vec2( 0.0, -1.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalUV + texelSize * vec2( 1.0, -1.0) * blurRadius).rgb * 0.0625;
-            color += texture2D(u_texture, finalUV + texelSize * vec2(-1.0,  0.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalUV).rgb * 0.25;
-            color += texture2D(u_texture, finalUV + texelSize * vec2( 1.0,  0.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalUV + texelSize * vec2(-1.0,  1.0) * blurRadius).rgb * 0.0625;
-            color += texture2D(u_texture, finalUV + texelSize * vec2( 0.0,  1.0) * blurRadius).rgb * 0.125;
-            color += texture2D(u_texture, finalUV + texelSize * vec2( 1.0,  1.0) * blurRadius).rgb * 0.0625;
+            vec3 color = texture2D(u_texture, finalUV).rgb;
 
             // Hue shift
             if (u_hueShift > 0.001) {
@@ -187,26 +180,50 @@
         return prog;
     }
 
-    function loadTexture(glCtx: WebGLRenderingContext, url: string): Promise<WebGLTexture | null> {
-        return new Promise((resolve) => {
-            const texture = glCtx.createTexture();
+    /**
+     * Decode the photo somewhere other than the main thread.
+     *
+     * An <img> looks free here and is not: its load event fires in a couple of milliseconds, and
+     * the 6.9 megapixel decode is then done synchronously inside texImage2D, which measured as a
+     * single 192 ms long task. createImageBitmap decodes on a worker thread instead and hands back
+     * the same pixels, so the upload is all that is left on the main thread - about 20 ms. The
+     * <img> is kept for anything without createImageBitmap.
+     */
+    async function decodeImage(url: string): Promise<TexImageSource | null> {
+        try {
+            if (typeof createImageBitmap === 'function') {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`${response.status} for the hero image`);
+                // Alpha is absent from the photo; matching the default unpack keeps it that way
+                return await createImageBitmap(await response.blob(), { premultiplyAlpha: 'none' });
+            }
             const img = new Image();
             img.crossOrigin = "anonymous";
-            img.onload = () => {
-                glCtx.bindTexture(glCtx.TEXTURE_2D, texture);
-                glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, glCtx.RGBA, glCtx.UNSIGNED_BYTE, img);
-                glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MIN_FILTER, glCtx.LINEAR);
-                glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MAG_FILTER, glCtx.LINEAR);
-                glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_S, glCtx.CLAMP_TO_EDGE);
-                glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_T, glCtx.CLAMP_TO_EDGE);
-                resolve(texture);
-            };
-            img.onerror = () => {
-                console.error('Failed to load hero background image');
-                resolve(null);
-            };
-            img.src = url;
-        });
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('the hero image did not load'));
+                img.src = url;
+            });
+            return img;
+        } catch (e) {
+            console.error('Failed to load hero background image', e);
+            return null;
+        }
+    }
+
+    async function loadTexture(glCtx: WebGLRenderingContext, url: string): Promise<WebGLTexture | null> {
+        const source = await decodeImage(url);
+        if (!source) return null;
+        const texture = glCtx.createTexture();
+        glCtx.bindTexture(glCtx.TEXTURE_2D, texture);
+        glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, glCtx.RGBA, glCtx.UNSIGNED_BYTE, source);
+        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MIN_FILTER, glCtx.LINEAR);
+        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MAG_FILTER, glCtx.LINEAR);
+        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_S, glCtx.CLAMP_TO_EDGE);
+        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_T, glCtx.CLAMP_TO_EDGE);
+        // The bitmap holds a full copy of the photo; the GPU has it now
+        if (source instanceof ImageBitmap) source.close();
+        return texture;
     }
 
     function resizeCanvas() {
@@ -217,13 +234,38 @@
         canvas.width = Math.floor(width * dpr);
         canvas.height = Math.floor(height * dpr);
         gl.viewport(0, 0, canvas.width, canvas.height);
+        canvasRect = canvas.getBoundingClientRect();
     }
 
     function onMouseMove(e: MouseEvent) {
+        if (!canvasRect) return;
         // Normalize to 0-1 range relative to the canvas
-        const rect = canvas.getBoundingClientRect();
-        targetMouseX = (e.clientX - rect.left) / rect.width;
-        targetMouseY = 1.0 - (e.clientY - rect.top) / rect.height; // flip Y for GL coords
+        targetMouseX = (e.clientX - canvasRect.left) / canvasRect.width;
+        targetMouseY = 1.0 - (e.clientY - canvasRect.top) / canvasRect.height; // flip Y for GL
+    }
+
+    // The shader costs a full-screen draw every frame, which is wasted once the hero has been
+    // scrolled past or the tab is in the background. Time is carried across the gap so the
+    // animation picks up where it left off rather than jumping.
+    function start() {
+        if (animationFrameId) return;
+        if (pausedAt) {
+            startTime += performance.now() - pausedAt;
+            pausedAt = 0;
+        }
+        animationFrameId = requestAnimationFrame(render);
+    }
+
+    function stop() {
+        if (!animationFrameId) return;
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = 0;
+        pausedAt = performance.now();
+    }
+
+    function syncRunning() {
+        if (onScreen && !document.hidden) start();
+        else stop();
     }
 
     function render(now: number) {
@@ -247,6 +289,10 @@
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
         animationFrameId = requestAnimationFrame(render);
+    }
+
+    function onScroll() {
+        if (canvas) canvasRect = canvas.getBoundingClientRect();
     }
 
     let resizeTimeout: ReturnType<typeof setTimeout>;
@@ -287,15 +333,26 @@
         resizeCanvas();
         window.addEventListener('resize', debouncedResize);
         window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        document.addEventListener('visibilitychange', syncRunning);
+
+        observer = new IntersectionObserver((entries) => {
+            onScreen = entries[0].isIntersecting;
+            syncRunning();
+        });
+        observer.observe(canvas);
 
         startTime = performance.now();
-        animationFrameId = requestAnimationFrame(render);
+        syncRunning();
     });
 
     onDestroy(() => {
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        stop();
+        observer?.disconnect();
         window.removeEventListener('resize', debouncedResize);
         window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('scroll', onScroll);
+        document.removeEventListener('visibilitychange', syncRunning);
         clearTimeout(resizeTimeout);
     });
 </script>
