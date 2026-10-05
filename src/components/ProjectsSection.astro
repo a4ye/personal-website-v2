@@ -110,17 +110,14 @@ const projects: Project[] = [
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12 3xl:gap-x-20">
         {
             projects.map((project, index) => (
-                <div class={index % 2 === 1 ? "md:mt-16" : ""}>
+                <div class:list={["relative", index % 2 === 1 && "md:mt-16"]} data-project-card>
                     <a
                         href={project.live || project.github}
                         target="_blank"
                         rel="noopener noreferrer"
                         class="group block no-underline"
                     >
-                        <div
-                            class="relative overflow-hidden rounded-xl mb-6"
-                            data-hover-video={project.video ? "" : undefined}
-                        >
+                        <div class="relative overflow-hidden rounded-xl mb-6">
                             {/*
                              * AVIF at 60 measures the same fidelity as the WebP at 90 it replaces
                              * - 38.0 dB against 38.1 - for 56 KB a card instead of 134. Nothing
@@ -168,6 +165,47 @@ const projects: Project[] = [
                             {project.title}
                         </h3>
                     </a>
+                    {project.video && (
+                        /*
+                         * A touch device has no hover, so the video needs a control. The badge
+                         * is a sibling of the card link, not a child of it: a button inside an
+                         * anchor is invalid, and a tap on it must not open the project. The
+                         * overlay matches the image box - full card width at 4/3 - and passes
+                         * taps through everywhere except on the badge itself, so the rest of
+                         * the image still follows the link.
+                         *
+                         * The badge carries no text, so its name is the aria-label the script keeps
+                         * in step with the state. A transparent ::before takes the circle past the
+                         * 44px a thumb needs.
+                         */
+                        <div class="pointer-events-none absolute inset-x-0 top-0 aspect-[4/3] flex items-end p-3 pointer-fine:hidden">
+                            <button
+                                type="button"
+                                data-video-toggle
+                                data-state="idle"
+                                data-title={project.title}
+                                aria-pressed="false"
+                                aria-label={`Play the ${project.title} demo`}
+                                class="group/badge pointer-events-auto relative inline-flex items-center justify-center rounded-full bg-black/55 p-3 text-white backdrop-blur-sm transition-colors before:absolute before:-inset-1 before:content-[''] active:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                            >
+                                <Icon
+                                    name="tabler--player-play-filled"
+                                    class="hidden w-4 h-4 group-data-[state=idle]/badge:block"
+                                    aria-hidden="true"
+                                />
+                                <Icon
+                                    name="eos-icons--loading"
+                                    class="hidden w-4 h-4 group-data-[state=loading]/badge:block"
+                                    aria-hidden="true"
+                                />
+                                <Icon
+                                    name="tabler--player-pause-filled"
+                                    class="hidden w-4 h-4 group-data-[state=playing]/badge:block"
+                                    aria-hidden="true"
+                                />
+                            </button>
+                        </div>
+                    )}
                     <p class="text-[1.05rem] text-base leading-[1.7] mb-5">{project.description}</p>
                     <div class="flex flex-wrap gap-2.5">
                         {project.tech.map((t) => (
@@ -185,36 +223,81 @@ const projects: Project[] = [
 </section>
 
 <script>
-    // Crossfade a card's image to its video while the card is hovered or focused
+    // Crossfade a card's image to its video: on hover where a pointer can hover, and on a tap of
+    // the card's badge where it cannot.
     const canHover = window.matchMedia("(hover: hover) and (pointer: fine)");
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    document.querySelectorAll<HTMLElement>("[data-hover-video]").forEach((frame) => {
-        const video = frame.querySelector("video");
-        const link = frame.closest("a");
+    // One card plays at a time. Each card's own way to stop, so any card can stop the others.
+    const stops = new Map<Element, () => void>();
+
+    document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
+        const video = card.querySelector("video");
+        const link = card.querySelector("a");
         if (!video || !link) return;
 
-        const start = () => {
-            if (!canHover.matches || reduceMotion.matches) return;
-            video.play().catch(() => {});
+        const badge = card.querySelector<HTMLButtonElement>("[data-video-toggle]");
+
+        const setState = (state: "idle" | "loading" | "playing") => {
+            if (!badge) return;
+            badge.dataset.state = state;
+            badge.setAttribute("aria-pressed", String(state !== "idle"));
+            // The badge shows only an icon, so its name must say what the icon means
+            const verb = state === "idle" ? "Play" : "Stop";
+            badge.setAttribute("aria-label", `${verb} the ${badge.dataset.title} demo`);
         };
+
         const stop = () => {
             video.pause();
             delete video.dataset.playing;
+            setState("idle");
+        };
+        stops.set(card, stop);
+
+        const start = () => {
+            stops.forEach((stopOther, other) => other !== card && stopOther());
+            // A rejected play is a cancelled one: the badge goes back to its resting state
+            video.play().catch(() => setState("idle"));
         };
 
         // Show the video only once frames are coming, so the image never flashes to black
         video.addEventListener("playing", () => {
             video.dataset.playing = "";
+            setState("playing");
         });
-        // Rewind after the fade out, so the next hover starts from the beginning
+        // Rewind after the fade out, so the next play starts from the beginning
         video.addEventListener("transitionend", () => {
             if (!("playing" in video.dataset)) video.currentTime = 0;
         });
 
-        link.addEventListener("pointerenter", start);
+        const hoverStart = () => {
+            if (!canHover.matches || reduceMotion.matches) return;
+            start();
+        };
+        link.addEventListener("pointerenter", hoverStart);
         link.addEventListener("pointerleave", stop);
-        link.addEventListener("focus", start);
+        link.addEventListener("focus", hoverStart);
         link.addEventListener("blur", stop);
+
+        // The badge is the touch path. A tap is a request for the video, so reduced motion does
+        // not block it; the fade is the only motion and it is short. The video holds preload="none",
+        // so this tap is what starts the download - the spinner covers the wait for the first frame.
+        badge?.addEventListener("click", () => {
+            if (badge.dataset.state === "idle") {
+                setState("loading");
+                start();
+            } else {
+                stop();
+            }
+        });
+    });
+
+    // A video the reader has scrolled away from, or a tab they have left, is not being watched
+    const offscreen = new IntersectionObserver((entries) => {
+        for (const entry of entries) if (!entry.isIntersecting) stops.get(entry.target)?.();
+    });
+    stops.forEach((_, card) => offscreen.observe(card));
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stops.forEach((stop) => stop());
     });
 </script>

@@ -15,3 +15,5 @@
     --breakpoint-3xl: 130rem;
 }
 
+/* A device that can hover with a precise pointer: it gets hover affordances, not tap ones */
+@custom-variant pointer-fine (@media (hover: hover) and (pointer: fine));
