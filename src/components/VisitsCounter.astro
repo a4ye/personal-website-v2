@@ -1,9 +1,9 @@
 ---
 import { Icon } from "astro-icon/components";
-import VisitsCounterTooltip from "./VisitsCounterTooltip";
+import Tooltip from "./Tooltip.svelte";
 ---
 
-<VisitsCounterTooltip client:idle>
+<Tooltip label="Total visits" client:idle>
     <span
         class="flex items-center gap-2 hover:text-accent duration-200 group"
         id="visits-counter"
@@ -19,7 +19,7 @@ import VisitsCounterTooltip from "./VisitsCounterTooltip";
         <Icon name="tabler--eye" class="mt-0.5 w-4 h-4 text-muted" aria-hidden="true" />
         <span>loading...</span>
     </span>
-</VisitsCounterTooltip>
+</Tooltip>
 
 <script>
     import { actions } from "astro:actions";

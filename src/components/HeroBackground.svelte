@@ -1,384 +1,141 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import heroImage from "../assets/hero.avif";
+    import { createRenderer, type Renderer } from "./hero/renderer";
 
-    let canvas: HTMLCanvasElement;
-    let gl: WebGLRenderingContext | null = null;
-    let animationFrameId: number = 0;
-    let startTime: number = 0;
-    let pausedAt: number = 0;
-    let onScreen = true;
-    let observer: IntersectionObserver | null = null;
-    // getBoundingClientRect on every mouse move forces a layout; the canvas only moves on
-    // resize or scroll, so read it then instead.
-    let canvasRect: DOMRect | null = null;
-    let program: WebGLProgram | null = null;
-
-    // Mouse position (normalized 0-1, with smoothing)
-    let mouseX = 0.5;
-    let mouseY = 0.5;
-    let targetMouseX = 0.5;
-    let targetMouseY = 0.5;
-
-    // Hue shift (0.0 to 1.0, where 1.0 = full 360° rotation)
+    /** 0 to 1, where 1 is a full turn around the colour wheel. */
     export let hueShift = 0.4;
 
-    const vertexShaderSource = `
-        attribute vec2 a_position;
-        varying vec2 v_uv;
-        void main() {
-            v_uv = a_position * 0.5 + 0.5;
-            gl_Position = vec4(a_position, 0.0, 1.0);
-        }
-    `;
+    let canvas: HTMLCanvasElement;
+    // The canvas is drawn on a worker thread where it can be handed over, because compiling the
+    // shader blocks whichever thread does it. Everything the renderer cannot see from there -
+    // the pointer, the size, whether the hero is still on screen - is watched here and posted.
+    let worker: Worker | null = null;
+    let renderer: Renderer | null = null; // only used when the canvas cannot be handed over
+    let observer: IntersectionObserver | null = null;
+    let onScreen = true;
+    // getBoundingClientRect on every mouse move forces a layout; the canvas only moves on resize
+    // or scroll, so read it then instead.
+    let canvasRect: DOMRect | null = null;
+    let resizeTimeout: ReturnType<typeof setTimeout>;
 
-    // Liquify effect + chromatic aberration + mouse tracking (nucleo's exact algorithm)
-    const fragmentShaderSource = `
-        precision highp float;
-        varying vec2 v_uv;
-        uniform float u_time;
-        uniform vec2 u_resolution;
-        uniform vec2 u_mouse;
-        uniform sampler2D u_texture;
-        uniform float u_hueShift;
+    // Past 1.5 the shader costs more than the sharpness is worth
+    const ratio = () => Math.min(window.devicePixelRatio || 1, 1.5);
 
-        const float PI = 3.14159265;
-
-        mat2 rot(float a) {
-            return mat2(cos(a), -sin(a), sin(a), cos(a));
-        }
-
-        // Nucleo's exact liquify algorithm with mouse-driven center
-        vec2 liquify(vec2 st, float rotAngle, float freq, float amplitude, float speed, vec2 center) {
-            float aspectRatio = u_resolution.x / u_resolution.y;
-
-            st -= center;
-            st.x *= aspectRatio;
-            st = st * rot(rotAngle * 2.0 * PI);
-
-            float t = u_time * speed;
-
-            for (float i = 1.0; i <= 5.0; i++) {
-                st = st * rot(i / 5.0 * PI * 2.0);
-                float ff = i * freq;
-                st.x += amplitude * cos(ff * st.y + t);
-                st.y += amplitude * sin(ff * st.x + t);
-            }
-
-            st = st * rot(rotAngle * -2.0 * PI);
-            st.x /= aspectRatio;
-            st += center;
-
-            return st;
-        }
-
-        void main() {
-            vec2 uv = v_uv;
-
-            float screenAspect = u_resolution.x / u_resolution.y;
-
-            // On landscape screens rotate 90° clockwise; on portrait use image as-is
-            vec2 texUV;
-            float imageAspect;
-            if (screenAspect >= 1.0) {
-                texUV = vec2(1.0 - uv.y, uv.x);
-                imageAspect = 1530.0 / 1122.0;
-                // After rotation UV axes are swapped, so crop logic is inverted
-                if (screenAspect > imageAspect) {
-                    float scale = screenAspect / imageAspect;
-                    texUV.x = (texUV.x - 0.5) / scale + 0.5;
-                } else {
-                    float scale = imageAspect / screenAspect;
-                    texUV.y = (texUV.y - 0.5) / scale + 0.5;
-                }
-            } else {
-                texUV = vec2(1.0 - uv.x, 1.0 - uv.y);
-                imageAspect = 1122.0 / 1530.0;
-                if (screenAspect > imageAspect) {
-                    float scale = screenAspect / imageAspect;
-                    texUV.y = (texUV.y - 0.5) / scale + 0.5;
-                } else {
-                    float scale = imageAspect / screenAspect;
-                    texUV.x = (texUV.x - 0.5) / scale + 0.5;
-                }
-            }
-
-            // Mirror horizontally
-            texUV.y = 1.0 - texUV.y;
-
-            // Liquify pass 1
-            vec2 center1 = vec2(0.5, 0.5) + (u_mouse - 0.5) * 0.3;
-            float freq1 = 5.0 * (0.14 + 0.1);
-            float amp1 = 0.34 * mix(0.2, 0.2 / (0.14 + 0.05), 0.25) * 0.4;
-            vec2 uv1 = mix(texUV, liquify(texUV, 0.8807, freq1, amp1, 0.0, center1), 0.15);
-
-            // Liquify pass 2
-            vec2 center2 = vec2(0.5, 0.5) + (u_mouse - 0.5) * 0.2;
-            float freq2 = 5.0 * (1.27 + 0.1);
-            float amp2 = 0.23 * mix(0.2, 0.2 / (1.27 + 0.05), 0.25) * 0.2;
-            vec2 finalUV = clamp(mix(uv1, liquify(uv1, 0.121, freq2, amp2, 0.0, center2), 0.08), 0.0, 1.0);
-
-            vec3 color = texture2D(u_texture, finalUV).rgb;
-
-            // Hue shift
-            if (u_hueShift > 0.001) {
-                float mx = max(color.r, max(color.g, color.b));
-                float mn = min(color.r, min(color.g, color.b));
-                float d = mx - mn;
-                float l = (mx + mn) * 0.5;
-                float s = d < 0.001 ? 0.0 : d / (1.0 - abs(2.0 * l - 1.0));
-                float h = 0.0;
-                if (d > 0.001) {
-                    if (mx == color.r) h = mod((color.g - color.b) / d, 6.0) / 6.0;
-                    else if (mx == color.g) h = ((color.b - color.r) / d + 2.0) / 6.0;
-                    else h = ((color.r - color.g) / d + 4.0) / 6.0;
-                }
-                h = fract(h + u_hueShift);
-                if (s > 0.001) {
-                    float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
-                    float p = 2.0 * l - q;
-                    vec3 t3 = fract(vec3(h + 1.0/3.0, h, h - 1.0/3.0));
-                    color.r = t3.x < 1.0/6.0 ? p+(q-p)*6.0*t3.x : t3.x < 0.5 ? q : t3.x < 2.0/3.0 ? p+(q-p)*(2.0/3.0-t3.x)*6.0 : p;
-                    color.g = t3.y < 1.0/6.0 ? p+(q-p)*6.0*t3.y : t3.y < 0.5 ? q : t3.y < 2.0/3.0 ? p+(q-p)*(2.0/3.0-t3.y)*6.0 : p;
-                    color.b = t3.z < 1.0/6.0 ? p+(q-p)*6.0*t3.z : t3.z < 0.5 ? q : t3.z < 2.0/3.0 ? p+(q-p)*(2.0/3.0-t3.z)*6.0 : p;
-                }
-            }
-
-            color = clamp(color, 0.0, 1.0);
-
-            gl_FragColor = vec4(color, 1.0);
-        }
-    `;
-
-    function createShader(glCtx: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
-        const shader = glCtx.createShader(type);
-        if (!shader) return null;
-        glCtx.shaderSource(shader, source);
-        glCtx.compileShader(shader);
-        // Deliberately not asking for COMPILE_STATUS here: the question cannot be answered until
-        // the driver has finished, so asking is what makes the compile block. If anything did go
-        // wrong the link below fails, and the logs are read then.
-        return shader;
-    }
-
-    /**
-     * Build the program, asking the driver whether it is finished rather than waiting for it.
-     *
-     * getProgramParameter(LINK_STATUS) cannot answer until the shader is compiled and linked, so
-     * it stalls the main thread: 353 ms on a profile that has never seen this page, and nothing at
-     * all on every later visit, because Chrome keeps the compiled program in its own cache.
-     * KHR_parallel_shader_compile adds a status flag that is meant to be readable without
-     * stalling. ANGLE on desktop OpenGL blocks on it anyway - measured here - but it does hold to
-     * the contract on Direct3D and Metal, which is where most visitors are. The deadline is for
-     * drivers that never report completion.
-     */
-    async function createProgramFromSources(
-        glCtx: WebGLRenderingContext, vsSrc: string, fsSrc: string,
-    ): Promise<WebGLProgram | null> {
-        const vs = createShader(glCtx, glCtx.VERTEX_SHADER, vsSrc);
-        const fs = createShader(glCtx, glCtx.FRAGMENT_SHADER, fsSrc);
-        if (!vs || !fs) return null;
-        const prog = glCtx.createProgram();
-        if (!prog) return null;
-        glCtx.attachShader(prog, vs);
-        glCtx.attachShader(prog, fs);
-        glCtx.linkProgram(prog);
-
-        const parallel = glCtx.getExtension('KHR_parallel_shader_compile');
-        if (parallel) {
-            const deadline = performance.now() + 2000;
-            while (!glCtx.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)
-                   && performance.now() < deadline) {
-                await new Promise((resolve) => setTimeout(resolve, 8));
-            }
-        }
-
-        if (!glCtx.getProgramParameter(prog, glCtx.LINK_STATUS)) {
-            console.error('Program link error:', glCtx.getProgramInfoLog(prog),
-                glCtx.getShaderInfoLog(vs), glCtx.getShaderInfoLog(fs));
-            glCtx.deleteProgram(prog);
-            return null;
-        }
-        return prog;
-    }
-
-    /**
-     * Decode the photo somewhere other than the main thread.
-     *
-     * An <img> looks free here and is not: its load event fires in a couple of milliseconds, and
-     * the 6.9 megapixel decode is then done synchronously inside texImage2D, which measured as a
-     * single 192 ms long task. createImageBitmap decodes on a worker thread instead and hands back
-     * the same pixels, so the upload is all that is left on the main thread - about 20 ms. The
-     * <img> is kept for anything without createImageBitmap.
-     */
-    async function decodeImage(url: string): Promise<TexImageSource | null> {
-        try {
-            if (typeof createImageBitmap === 'function') {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`${response.status} for the hero image`);
-                // Alpha is absent from the photo; matching the default unpack keeps it that way
-                return await createImageBitmap(await response.blob(), { premultiplyAlpha: 'none' });
-            }
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            await new Promise<void>((resolve, reject) => {
-                img.onload = () => resolve();
-                img.onerror = () => reject(new Error('the hero image did not load'));
-                img.src = url;
-            });
-            return img;
-        } catch (e) {
-            console.error('Failed to load hero background image', e);
-            return null;
-        }
-    }
-
-    async function loadTexture(glCtx: WebGLRenderingContext, url: string): Promise<WebGLTexture | null> {
-        const source = await decodeImage(url);
-        if (!source) return null;
-        const texture = glCtx.createTexture();
-        glCtx.bindTexture(glCtx.TEXTURE_2D, texture);
-        glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, glCtx.RGBA, glCtx.UNSIGNED_BYTE, source);
-        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MIN_FILTER, glCtx.LINEAR);
-        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MAG_FILTER, glCtx.LINEAR);
-        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_S, glCtx.CLAMP_TO_EDGE);
-        glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_T, glCtx.CLAMP_TO_EDGE);
-        // The bitmap holds a full copy of the photo; the GPU has it now
-        if (source instanceof ImageBitmap) source.close();
-        return texture;
-    }
-
-    function resizeCanvas() {
-        if (!canvas || !gl) return;
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    function setSize() {
+        if (!canvas) return;
+        canvasRect = canvas.getBoundingClientRect();
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
-        canvas.width = Math.floor(width * dpr);
-        canvas.height = Math.floor(height * dpr);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        canvasRect = canvas.getBoundingClientRect();
+        if (worker) worker.postMessage({ type: "size", width, height, dpr: ratio() });
+        else renderer?.setSize(width, height, ratio());
     }
 
     function onMouseMove(e: MouseEvent) {
         if (!canvasRect) return;
-        // Normalize to 0-1 range relative to the canvas
-        targetMouseX = (e.clientX - canvasRect.left) / canvasRect.width;
-        targetMouseY = 1.0 - (e.clientY - canvasRect.top) / canvasRect.height; // flip Y for GL
-    }
-
-    // The shader costs a full-screen draw every frame, which is wasted once the hero has been
-    // scrolled past or the tab is in the background. Time is carried across the gap so the
-    // animation picks up where it left off rather than jumping.
-    function start() {
-        if (animationFrameId) return;
-        if (pausedAt) {
-            startTime += performance.now() - pausedAt;
-            pausedAt = 0;
-        }
-        animationFrameId = requestAnimationFrame(render);
-    }
-
-    function stop() {
-        if (!animationFrameId) return;
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = 0;
-        pausedAt = performance.now();
-    }
-
-    function syncRunning() {
-        if (onScreen && !document.hidden) start();
-        else stop();
-    }
-
-    function render(now: number) {
-        if (!gl || !program) return;
-
-        const elapsed = (now - startTime) / 1000.0;
-
-        // Smooth mouse position with heavy lag for subtle, fluid response
-        const smoothing = 0.02;
-        mouseX += (targetMouseX - mouseX) * smoothing;
-        mouseY += (targetMouseY - mouseY) * smoothing;
-
-        gl.useProgram(program);
-
-        gl.uniform1f(gl.getUniformLocation(program, 'u_time'), elapsed);
-        gl.uniform2f(gl.getUniformLocation(program, 'u_resolution'), canvas.width, canvas.height);
-        gl.uniform2f(gl.getUniformLocation(program, 'u_mouse'), mouseX, mouseY);
-        gl.uniform1i(gl.getUniformLocation(program, 'u_texture'), 0);
-        gl.uniform1f(gl.getUniformLocation(program, 'u_hueShift'), hueShift);
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-        animationFrameId = requestAnimationFrame(render);
+        // As a fraction of the canvas, with y counted from the bottom, the way GL reads it
+        const x = (e.clientX - canvasRect.left) / canvasRect.width;
+        const y = 1 - (e.clientY - canvasRect.top) / canvasRect.height;
+        if (worker) worker.postMessage({ type: "mouse", x, y });
+        else renderer?.setMouse(x, y);
     }
 
     function onScroll() {
         if (canvas) canvasRect = canvas.getBoundingClientRect();
     }
 
-    let resizeTimeout: ReturnType<typeof setTimeout>;
     function debouncedResize() {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(resizeCanvas, 50);
+        resizeTimeout = setTimeout(setSize, 50);
+    }
+
+    /** A full-screen draw every frame is wasted once the hero is scrolled past or the tab is hidden. */
+    function syncRunning() {
+        const on = onScreen && !document.hidden;
+        if (worker) worker.postMessage({ type: "run", on });
+        else if (on) renderer?.start();
+        else renderer?.stop();
+    }
+
+    /** The photo, as bytes. index.astro chose which copy of it suits this screen and began fetching. */
+    async function heroBlob(): Promise<Blob | null> {
+        const handoff = (window as any).__hero as
+            | { url: string; blob: Promise<Blob | null> }
+            | undefined;
+        const url = handoff?.url ?? (typeof heroImage === "string" ? heroImage : heroImage.src);
+        try {
+            const blob =
+                (handoff && (await handoff.blob)) ||
+                (await fetch(url).then((r) => (r.ok ? r.blob() : null)));
+            if (!blob) throw new Error("the hero image did not load");
+            return blob;
+        } catch (e) {
+            console.error("Failed to load hero background image", e);
+            return null;
+        }
     }
 
     onMount(async () => {
-        gl = canvas.getContext('webgl', { antialias: false, alpha: false });
-        if (!gl) {
-            console.error('WebGL not supported');
-            return;
+        if (typeof canvas.transferControlToOffscreen === "function" && typeof Worker !== "undefined") {
+            try {
+                worker = new Worker(new URL("./hero/worker.ts", import.meta.url), {
+                    type: "module",
+                });
+                const surface = canvas.transferControlToOffscreen();
+                worker.postMessage(
+                    {
+                        type: "init",
+                        canvas: surface,
+                        hueShift,
+                        width: canvas.clientWidth,
+                        height: canvas.clientHeight,
+                        dpr: ratio(),
+                    },
+                    [surface],
+                );
+            } catch (e) {
+                // Nothing is lost by drawing here instead, beyond the stall this was avoiding
+                console.warn("hero: drawing on the main thread -", e);
+                worker?.terminate();
+                worker = null;
+            }
+        }
+        if (!worker) {
+            renderer = createRenderer(canvas, hueShift);
+            if (!renderer) return;
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight, ratio());
         }
 
-        // The driver compiles the shader while the photo is fetched and decoded; neither waits on
-        // the other, and the hero is ready when the slower of the two is
-        const compiling = createProgramFromSources(gl, vertexShaderSource, fragmentShaderSource);
-        const imageUrl = typeof heroImage === 'string' ? heroImage : heroImage.src;
-        const loading = loadTexture(gl, imageUrl);
-
-        program = await compiling;
-        if (!program) return;
-
-        // Full-screen quad
-        const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-        gl.useProgram(program);
-        const posLoc = gl.getAttribLocation(program, 'a_position');
-        gl.enableVertexAttribArray(posLoc);
-        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
-        const texture = await loading;
-        if (!texture) return;
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-
-        resizeCanvas();
-        window.addEventListener('resize', debouncedResize);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('scroll', onScroll, { passive: true });
-        document.addEventListener('visibilitychange', syncRunning);
-
+        canvasRect = canvas.getBoundingClientRect();
+        window.addEventListener("resize", debouncedResize);
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("scroll", onScroll, { passive: true });
+        document.addEventListener("visibilitychange", syncRunning);
         observer = new IntersectionObserver((entries) => {
             onScreen = entries[0].isIntersecting;
             syncRunning();
         });
         observer.observe(canvas);
-
-        startTime = performance.now();
         syncRunning();
+
+        const blob = await heroBlob();
+        if (!blob) return;
+        if (worker) worker.postMessage({ type: "texture", blob });
+        else renderer?.setTexture(blob);
     });
 
+    // Nothing drives this today, but a hue that could not be changed after the first frame would
+    // be a trap for whatever does next
+    $: if (worker) worker.postMessage({ type: "hue", hueShift });
+
     onDestroy(() => {
-        stop();
         observer?.disconnect();
-        window.removeEventListener('resize', debouncedResize);
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('scroll', onScroll);
-        document.removeEventListener('visibilitychange', syncRunning);
+        worker?.terminate();
+        renderer?.destroy();
+        window.removeEventListener("resize", debouncedResize);
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("scroll", onScroll);
+        document.removeEventListener("visibilitychange", syncRunning);
         clearTimeout(resizeTimeout);
     });
 </script>

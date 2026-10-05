@@ -1,9 +1,12 @@
 ---
-import GithubCommit from "../components/GithubCommit.tsx";
+import { Icon } from "astro-icon/components";
+import Tooltip from "./Tooltip.svelte";
 import VisitsCounter from "./VisitsCounter.astro";
 import UwateringIcon from "../assets/icons/uwatering.svg?raw";
 
 const currentYear = new Date().getFullYear();
+// Read when the site was built; see astro.config.mjs. Null only if GitHub could not be reached.
+const commit = __GIT_COMMIT__;
 ---
 
 <footer class="w-full bg-surface">
@@ -18,8 +21,28 @@ const currentYear = new Date().getFullYear();
                 </a>
                 <a href="https://cs.uwatering.com/#aaronye.dev?nav=next" class="hover:text-accent transition-colors" aria-label="Next site in webring">→</a>
             </div>
-            <span class="text-line">|</span>
-            <GithubCommit client:load />
+            {
+                commit && (
+                    <>
+                        <span class="text-line">|</span>
+                        <Tooltip date={commit.commitDate} client:idle>
+                            <a
+                                href={commit.commitUrl}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                class="flex items-center gap-2 hover:text-accent duration-200 group"
+                            >
+                                <Icon
+                                    name="lucide--git-commit-horizontal"
+                                    class="mt-0.5 w-4 h-4 text-muted group-hover:text-accent duration-200"
+                                    aria-hidden="true"
+                                />
+                                <span>{commit.shortSha}</span>
+                            </a>
+                        </Tooltip>
+                    </>
+                )
+            }
             <span class="text-line">|</span>
             <VisitsCounter />
         </div>

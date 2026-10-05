@@ -2,6 +2,10 @@
 import "../styles/global.css";
 import "@fontsource/figtree";
 import "@fontsource/petrona/400.css";
+// The two faces every page sets text in. They are named inside the stylesheet, so without these
+// the browser cannot know it wants them until the stylesheet has been parsed.
+import figtreeLatin from "@fontsource/figtree/files/figtree-latin-400-normal.woff2?url";
+import petronaLatin from "@fontsource/petrona/files/petrona-latin-400-normal.woff2?url";
 import Footer from "../components/Footer.astro";
 import NavBar from "../components/NavBar.astro";
 
@@ -19,6 +23,8 @@ const env = import.meta.env.PUBLIC_ENV as string;
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preload" as="font" type="font/woff2" href={figtreeLatin} crossorigin />
+        <link rel="preload" as="font" type="font/woff2" href={petronaLatin} crossorigin />
         <meta name="generator" content={Astro.generator} />
         <title>Aaron Ye</title>
         {

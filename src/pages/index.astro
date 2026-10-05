@@ -6,16 +6,42 @@ import NavLinks from "../components/NavLinks.svelte";
 import Contacts from "../components/Contacts.astro";
 import MobileNav from "../components/MobileNav.svelte";
 import ProjectsSection from "../components/ProjectsSection.astro";
-import heroImage from "../assets/hero.avif";
+import hero1536 from "../assets/hero-1536.avif";
+import hero2304 from "../assets/hero-2304.avif";
+import hero3060 from "../assets/hero.avif";
+
+// Written by scripts/hero-art/upscale.py, smallest first, measured on the long edge
+const heroSources = [
+    { height: 1536, url: hero1536.src },
+    { height: 2304, url: hero2304.src },
+    { height: 3060, url: hero3060.src },
+];
 ---
 
 <Layout hideHeader>
-    {/*
-     * The hero photo is asked for by the island, which cannot ask until its own script has been
-     * fetched and run - about 290 ms in. The preload starts it with the stylesheet instead, and
-     * the island finds it already in the cache.
-     */}
-    <link slot="head" rel="preload" as="image" type="image/avif" href={heroImage.src} fetchpriority="high" />
+    <script slot="head" is:inline define:vars={{ sources: heroSources }}>
+        /*
+         * Choose the hero photo and start fetching it.
+         *
+         * The shader covers the window with it, and cover-fit means it is sampled at about as many
+         * pixels as the canvas is long on its longest side, so anything much larger is downloaded
+         * and thrown away. The 1.2 is the liquify pass: it stretches the photo locally, by up to
+         * 1.19x at the worst point on the screen, and a texture has to cover that too or those
+         * places go soft. The island is the only thing that knows how to draw any of this, but it
+         * cannot ask for a file until its own script has been fetched and run, about 290 ms in. So
+         * the choosing and the asking happen here, with the stylesheet, and
+         * HeroBackground.svelte picks the answer up off window.__hero.
+         */
+        var dpr = Math.min(window.devicePixelRatio || 1, 1.5); // the cap the canvas is drawn at
+        var want = 1.2 * dpr * Math.max(window.innerWidth, window.innerHeight);
+        var pick = sources.find((s) => s.height >= want) || sources[sources.length - 1];
+        window.__hero = {
+            url: pick.url,
+            blob: fetch(pick.url)
+                .then((r) => (r.ok ? r.blob() : null))
+                .catch(() => null), // the island fetches it the slow way if this failed
+        };
+    </script>
     <!-- Full-viewport hero section -->
     <section class="hero-section relative min-h-screen flex flex-col">
         <div class="absolute inset-0 z-[-1]">

@@ -1,10 +1,10 @@
 ---
 import { Icon } from "astro-icon/components";
-import IconTooltip from "./IconTooltip";
+import Tooltip from "./Tooltip.svelte";
 ---
 
 <div class="flex sm:justify-end gap-4">
-    <IconTooltip label="GitHub" client:idle>
+    <Tooltip label="GitHub" client:idle>
         <a
             aria-label="Github"
             href="https://github.com/a4ye/"
@@ -16,8 +16,8 @@ import IconTooltip from "./IconTooltip";
                 class="w-4 h-4 text-accent hover:text-base transition-colors duration-200"
             />
         </a>
-    </IconTooltip>
-    <IconTooltip label="LinkedIn" client:idle>
+    </Tooltip>
+    <Tooltip label="LinkedIn" client:idle>
         <a
             aria-label="LinkedIn"
             href="https://www.linkedin.com/in/aaron--ye"
@@ -29,8 +29,8 @@ import IconTooltip from "./IconTooltip";
                 class="w-4 h-4 text-accent hover:text-base transition-colors duration-200"
             />
         </a>
-    </IconTooltip>
-    <IconTooltip label="X" client:idle>
+    </Tooltip>
+    <Tooltip label="X" client:idle>
         <a
             aria-label="X"
             href="https://x.com/aaronye1001"
@@ -42,8 +42,8 @@ import IconTooltip from "./IconTooltip";
                 class="w-4 h-4 text-accent hover:text-base transition-colors duration-200"
             />
         </a>
-    </IconTooltip>
-    <IconTooltip label="Email" client:idle>
+    </Tooltip>
+    <Tooltip label="Email" client:idle>
         <a
             aria-label="Email"
             href="mailto:aaronye1001@gmail.com"
@@ -53,8 +53,8 @@ import IconTooltip from "./IconTooltip";
                 class="w-4 h-4 text-accent hover:text-base transition-colors duration-200"
             />
         </a>
-    </IconTooltip>
-    <IconTooltip label="Resume" client:idle>
+    </Tooltip>
+    <Tooltip label="Resume" client:idle>
         <a
             aria-label="Resume"
             href="/resume"
@@ -66,5 +66,5 @@ import IconTooltip from "./IconTooltip";
                 class="w-4 h-4 text-accent hover:text-base transition-colors duration-200"
             />
         </a>
-    </IconTooltip>
+    </Tooltip>
 </div>

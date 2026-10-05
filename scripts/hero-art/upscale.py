@@ -5,7 +5,9 @@ The photo (hero-photo.png) is small and carries compression blocks, which show
 up as pixelation once the hero shader stretches it across a large screen.
 Real-ESRGAN redraws it at 4x without the blocks; it is then scaled down to 2x
 (2244 x 3060, the shape the shader expects) and saved as 10-bit AVIF, which
-keeps the smooth gradients far better than 8-bit AVIF or lossy WebP.
+keeps the smooth gradients far better than 8-bit AVIF or lossy WebP. Smaller
+copies are written beside it, one per screen size the shader might be asked to
+cover, so a phone does not download a texture meant for a 4K monitor.
 
 Run from anywhere:  python3 scripts/hero-art/upscale.py
 Needs realesrgan-ncnn-vulkan (https://github.com/xinntao/Real-ESRGAN/releases) on
@@ -29,6 +31,7 @@ SRC = HERE / "hero-photo.png"
 OUT = HERE.parents[1] / "src" / "assets" / "hero.avif"
 
 W, H = 2244, 3060
+SIZES = (1536, 2304)  # the smaller copies, by height; see main()
 TILE = 256  # Real-ESRGAN tile size, in source pixels
 
 
@@ -81,8 +84,19 @@ def save(img, path):
 def main():
     photo = np.asarray(Image.open(SRC).convert("RGB"))
     peaks = photo.max((0, 1)) / 255  # Real-ESRGAN nudges some reds to full; keep the photo's peaks
-    save(np.minimum(upscale(photo), peaks), OUT)
-    print(f"wrote {OUT.relative_to(HERE.parents[1])}")
+    big = np.minimum(upscale(photo), peaks)
+    save(big, OUT)
+    written = [OUT]
+    # The shader covers the window with this photo, so the only part of it anyone sees is about as
+    # many pixels as the canvas is long, plus the fifth the liquify pass stretches it by. A phone
+    # needs about 1500 of them and used to download all 3060. index.astro picks between these.
+    for tall in SIZES:
+        wide = round(tall * W / H)
+        path = OUT.with_name(f"{OUT.stem}-{tall}{OUT.suffix}")
+        save(cv2.resize(big, (wide, tall), interpolation=cv2.INTER_AREA), path)
+        written.append(path)
+    for path in written:
+        print(f"wrote {path.relative_to(HERE.parents[1])} ({path.stat().st_size / 1024:.0f} KB)")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-
-@plugin "tailwindcss-animate";
 
 @theme {
     --color-accent: #3d6b55;
