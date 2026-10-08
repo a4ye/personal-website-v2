@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
 import ottoLabsLogo from "../assets/logos/ottolabs.png";
+import imbueLogo from "../assets/logos/imbue.png";
 import uwaterlooLogo from "../assets/logos/uwaterloo.png";
 import eurekahacksLogo from "../assets/logos/eurekahacks2025.png";
 import counterspell from "../assets/logos/counterspell.png";
@@ -17,6 +18,29 @@ import HackathonList from "./HackathonList.astro";
 
     <h2 class="font-serif text-2xl font-normal text-accent mt-10 mb-5">Currently</h2>
     <ul class="list-none p-0 m-0 flex flex-col gap-3">
+        <li class="flex items-center gap-3">
+            <Icon
+                name="iconamoon--arrow-right-2-bold"
+                class="w-4 h-4 text-accent shrink-0"
+                aria-hidden="true"
+            />
+            <span
+                >Incoming Software Engineering Intern @
+                <Image
+                    src={imbueLogo}
+                    alt="Imbue"
+                    width={32}
+                    class="w-4 h-4 inline-block align-middle mx-1"
+                />
+                <a
+                    href="https://imbue.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
+                    >Imbue</a
+                >
+            </span>
+        </li>
         <li class="flex items-center gap-3">
             <Icon
                 name="iconamoon--arrow-right-2-bold"
@@ -47,14 +71,6 @@ import HackathonList from "./HackathonList.astro";
                 aria-hidden="true"
             />
             <span>Learning about machine learning, AI, and systems programming</span>
-        </li>
-        <li class="flex items-center gap-3">
-            <Icon
-                name="iconamoon--arrow-right-2-bold"
-                class="w-4 h-4 text-accent shrink-0"
-                aria-hidden="true"
-            />
-            <span>Seeking Winter 2027 internships</span>
         </li>
     </ul>
 
