@@ -16,6 +16,28 @@ const heroSources = [
     { height: 2304, url: hero2304.src },
     { height: 3060, url: hero3060.src },
 ];
+
+// Tells a search engine that this site is one person, and which accounts elsewhere are the same
+// person. Google reads it for the knowledge panel a name query can show beside the results.
+const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Aaron Ye",
+    url: "https://aaronye.dev",
+    jobTitle: "Software Engineer",
+    description:
+        "Computer science student at the University of Waterloo who builds full-stack applications with a focus on backend systems.",
+    affiliation: {
+        "@type": "CollegeOrUniversity",
+        name: "University of Waterloo",
+        url: "https://uwaterloo.ca/",
+    },
+    sameAs: [
+        "https://github.com/a4ye",
+        "https://www.linkedin.com/in/aaron--ye",
+        "https://x.com/aaronye1001",
+    ],
+};
 ---
 
 <Layout hideHeader>
@@ -42,6 +64,13 @@ const heroSources = [
                 .catch(() => null), // the island fetches it the slow way if this failed
         };
     </script>
+    <!-- After the hero script, which is on the critical path and this is not -->
+    <script
+        slot="head"
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(personSchema)}
+    />
     <!-- Full-viewport hero section -->
     <section class="hero-section relative min-h-screen flex flex-col">
         <div class="absolute inset-0 z-[-1]">

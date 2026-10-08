@@ -11,9 +11,33 @@ import NavBar from "../components/NavBar.astro";
 
 interface Props {
     hideHeader?: boolean;
+    /** The tab and the search result heading. Pages pass their own; the site name is the default. */
+    title?: string;
+    /** The sentence a search result or a link preview shows below the title. */
+    description?: string;
+    /** Open Graph type: "article" for a blog post, "website" for everything else. */
+    ogType?: "website" | "article";
+    /** Keep the page out of search results. For pages that are errors or are private. */
+    noindex?: boolean;
 }
 
-const { hideHeader = false } = Astro.props;
+const SITE_NAME = "Aaron Ye";
+const DEFAULT_DESCRIPTION =
+    "Aaron Ye is a computer science student at the University of Waterloo who builds full-stack applications with a focus on backend systems.";
+
+const {
+    hideHeader = false,
+    title = SITE_NAME,
+    description = DEFAULT_DESCRIPTION,
+    ogType = "website",
+    noindex = false,
+} = Astro.props;
+
+// Astro.site is set in astro.config.mjs, so both of these are absolute. Crawlers and the link
+// previews of other sites reject a relative one.
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImageUrl = new URL("/og.png", Astro.site).href;
+
 const env = import.meta.env.PUBLIC_ENV as string;
 ---
 
@@ -26,7 +50,29 @@ const env = import.meta.env.PUBLIC_ENV as string;
         <link rel="preload" as="font" type="font/woff2" href={figtreeLatin} crossorigin />
         <link rel="preload" as="font" type="font/woff2" href={petronaLatin} crossorigin />
         <meta name="generator" content={Astro.generator} />
-        <title>Aaron Ye</title>
+
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="author" content={SITE_NAME} />
+        <meta name="theme-color" content="#f2f7f4" />
+        <link rel="canonical" href={canonicalUrl} />
+        {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+        <meta property="og:type" content={ogType} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="aaron ye, over the green hero artwork of the site" />
+        <meta property="og:locale" content="en_CA" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImageUrl} />
         {
             env === "PROD" && (
                 <>

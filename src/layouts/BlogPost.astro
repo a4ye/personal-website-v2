@@ -26,7 +26,32 @@ const formatDate = (date: Date) => {
 };
 ---
 
-<Layout>
+<Layout
+    title={`${frontmatter.title} — Aaron Ye`}
+    description={frontmatter.description}
+    ogType="article"
+>
+    <Fragment slot="head">
+        <meta
+            property="article:published_time"
+            content={new Date(frontmatter.pubDate).toISOString()}
+        />
+        <meta property="article:author" content="Aaron Ye" />
+        {frontmatter.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+        <script
+            type="application/ld+json"
+            is:inline
+            set:html={JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                headline: frontmatter.title,
+                description: frontmatter.description,
+                datePublished: new Date(frontmatter.pubDate).toISOString(),
+                author: { "@type": "Person", name: "Aaron Ye", url: "https://aaronye.dev" },
+                keywords: frontmatter.tags,
+            })}
+        />
+    </Fragment>
     <div class="max-w-3xl mx-auto pt-14 pb-16">
         <a
             href="/writing"

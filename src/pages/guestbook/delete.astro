@@ -41,7 +41,11 @@ const formatMessage = (message: string) =>
     entryId === null ? (
         <NotFound />
     ) : (
-        <Layout>
+        <Layout
+            title="Delete guestbook entry — Aaron Ye"
+            description="Remove your entry from the guestbook."
+            noindex
+        >
             <div class="max-w-3xl mx-auto pt-20 pb-16">
                 <h1 class="font-serif text-5xl font-normal text-accent mb-3">{heading}</h1>
                 <p class="text-muted mb-8">{detail}</p>
