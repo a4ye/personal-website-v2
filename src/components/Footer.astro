@@ -17,11 +17,11 @@ const commit = __GIT_COMMIT__;
         <span>© {currentYear} Aaron Ye</span>
         <div class="flex items-center gap-4">
             <div class="webring flex items-center gap-1.5">
-                <a href="https://cs.uwatering.com/#aaronye.dev?nav=prev" class="hover:text-accent transition-colors" aria-label="Previous site in webring">←</a>
-                <a href="https://cs.uwatering.com/#aaronye.dev" target="_blank" rel="noopener noreferrer" class="webring-icon" aria-label="UWatering CS Webring">
+                <a href="https://cs.uwatering.com/#aaronye.dev?nav=prev" data-umami-event="webring-click" data-umami-event-direction="prev" class="hover:text-accent transition-colors" aria-label="Previous site in webring">←</a>
+                <a href="https://cs.uwatering.com/#aaronye.dev" data-umami-event="webring-click" data-umami-event-direction="home" target="_blank" rel="noopener noreferrer" class="webring-icon" aria-label="UWatering CS Webring">
                     <Fragment set:html={UwateringIcon} />
                 </a>
-                <a href="https://cs.uwatering.com/#aaronye.dev?nav=next" class="hover:text-accent transition-colors" aria-label="Next site in webring">→</a>
+                <a href="https://cs.uwatering.com/#aaronye.dev?nav=next" data-umami-event="webring-click" data-umami-event-direction="next" class="hover:text-accent transition-colors" aria-label="Next site in webring">→</a>
             </div>
             {
                 commit && (

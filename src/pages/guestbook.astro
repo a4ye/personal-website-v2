@@ -351,6 +351,18 @@ const pageBtnDisabled = `${pageBtnBase} text-line pointer-events-none`;
         const result = await actions.submitGuestbookEntry(formData);
         setLoading(false);
 
+        // The outcome only, never what the visitor wrote
+        const outcome = isInputError(result.error)
+            ? "invalid"
+            : result.error?.code === "TOO_MANY_REQUESTS"
+              ? "rate-limited"
+              : result.error?.code === "BAD_REQUEST"
+                ? "rejected"
+                : result.error || !result.data
+                  ? "error"
+                  : "ok";
+        window.umami?.track("guestbook-submit", { result: outcome });
+
         if (isInputError(result.error)) {
             formSuccess.textContent = "";
             if (result.error.fields.name) {

@@ -248,7 +248,7 @@
         curious = false;
         if (!found) {
             found = true;
-            (window as any).umami?.track("cat-found");
+            window.umami?.track("cat-found");
         }
         if (calm) return;
         blinkLater();

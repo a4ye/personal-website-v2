@@ -106,7 +106,7 @@ const hackathons = [
 ---
 
 <li>
-    <details class="group">
+    <details class="group" data-hackathons>
         <summary class="cursor-pointer flex items-center gap-3 list-none text-base">
             <Icon
                 name="iconamoon--arrow-right-2-bold"
@@ -138,6 +138,8 @@ const hackathons = [
                         />
                         <a
                             href={h.link}
+                            data-umami-event="outbound-click"
+                            data-umami-event-label={h.name}
                             target="_blank"
                             rel="noopener noreferrer"
                             class="text-base underline decoration-line underline-offset-2 transition-colors duration-200 hover:decoration-base"
@@ -151,3 +153,11 @@ const hackathons = [
         </ul>
     </details>
 </li>
+
+<script>
+    // Counted on each opening, not on closing
+    const list = document.querySelector<HTMLDetailsElement>("[data-hackathons]");
+    list?.addEventListener("toggle", () => {
+        if (list.open) window.umami?.track("hackathons-expand");
+    });
+</script>

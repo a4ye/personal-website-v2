@@ -113,6 +113,8 @@ const projects: Project[] = [
                 <div class:list={["relative", index % 2 === 1 && "md:mt-16"]} data-project-card>
                     <a
                         href={project.live || project.github}
+                        data-umami-event="project-open"
+                        data-umami-event-project={project.title}
                         target="_blank"
                         rel="noopener noreferrer"
                         class="group block no-underline"
@@ -286,6 +288,7 @@ const projects: Project[] = [
             if (badge.dataset.state === "idle") {
                 setState("loading");
                 start();
+                window.umami?.track("project-demo-play", { project: badge.dataset.title });
             } else {
                 stop();
             }
