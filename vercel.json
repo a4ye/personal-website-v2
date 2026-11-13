@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/c/t.js", "destination": "https://umami.aaronye.dev/script.js" },
+    { "source": "/c/r.js", "destination": "https://umami.aaronye.dev/recorder.js" },
+    { "source": "/c/api/send", "destination": "https://umami.aaronye.dev/api/send" }
+  ]
+}
