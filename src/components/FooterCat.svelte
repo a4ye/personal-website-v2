@@ -5,13 +5,17 @@
     import nearEyeImage from "../assets/cat/eye-near.webp?url&no-inline";
     import farEyeImage from "../assets/cat/eye-far.webp?url&no-inline";
     import butterflyImage from "../assets/cat/butterfly.webp?url&no-inline";
+    // Caveat, cut down to ":3" by scripts/cat-art/smile.sh
+    import smileFont from "../assets/cat/smile.woff?url&no-inline";
 
     /**
      * The cat behind the footer line.
      *
      * It stands against the right edge of the screen, and only the tips of its ears show above the
-     * line. Pressing them brings the cat up, where it blinks now and then and watches the cursor,
-     * or a butterfly that comes by every few seconds while the cursor is still. Pressing it while
+     * line. Until it has been found, sparkles flash round the tip of its left ear every few
+     * seconds, to say there is something there to press. Pressing them brings the cat up, where
+     * it blinks now and then and watches the cursor, or a butterfly that comes by every few
+     * seconds while the cursor is still. Pressing it while
      * it is up gets a blink back, held shut a little longer. Scrolling the footer away sends it
      * back down. Both come from one pin, cut out and recoloured by scripts/cat-art/cat.py.
      */
@@ -47,10 +51,28 @@
         shut
             ? `transform: rotate(${-eye.tilt}deg) scaleX(${1 - SQUASH * shut}) rotate(${eye.tilt}deg);`
             : "";
-    // How much of it shows. Hiding, the top 13%: its ears. Up, the top 75%: its head and neck;
-    // the bottom of the picture is cut straight, and stays behind the line.
-    const PEEK = 0.2;
+    // How much of it shows. Hiding, the top 30.5%: its ears and the top of its head, as much as
+    // can show with its eyes, which start at 31.9%, still a few px under the line. A cursor over
+    // it brings it up 6 px more, and the tops of its eyes with it. Up, the top 75%: its head and
+    // neck; the bottom of the picture is cut straight, and stays behind the line.
+    const PEEK = 0.305;
     const SHOW = 0.75;
+    // A sparkle: a four-pointed star, its sides drawn in, and the rays that flash out across it
+    const STAR =
+        "M12 0C12.6 7.6 16.4 11.4 24 12 16.4 12.6 12.6 16.4 12 24 11.4 16.4 7.6 12.6 0 12 7.6 11.4 11.4 7.6 12 0Z";
+    const RAYS = "M12-10V34M-10 12H34";
+    // The sparkles: when they first come, after the footer comes into view, how long the three
+    // take, one after the other, and how long from the end of one time to the next. They are CSS
+    // animations, so the times are in their keyframes too.
+    const HINT_FIRST = 1200;
+    const HINT_LASTS = 1400;
+    const HINT_BETWEEN = [1000, 2000];
+    // Each press gives back a ":3", which rises a little and fades: a CSS animation. Each comes
+    // somewhere round the middle of its head as it is up (MIDDLE, of its width across and its
+    // height down), AROUND cat widths from it, on the side it faces or above: the other side is
+    // past the edge of the screen. Pressed again and again, they come one over another.
+    const MIDDLE = [0.4, 0.35];
+    const AROUND = [0.55, 0.8];
     // What takes a press: the cat's outline, MARGIN of its width out round it, as printed by
     // cat.py, in a box that much bigger than the picture all round. Only what shows of it takes
     // one, so while the cat hides, that is its ears and the margin round them.
@@ -90,6 +112,7 @@
     let cat: HTMLDivElement; // wider than spot: the rest of it is past the edge of the screen
     let up = false;
     let curious = false;
+    let hinting = false;
     let shut = 0; // how shut the eyes are, from 0 to 1
     let ready = false; // the eyes are only asked for once the footer has come into view
     let fly: { x: number; y: number; opacity: number } | null = null;
@@ -98,8 +121,12 @@
     let observer: IntersectionObserver | null = null;
     let blinkTimer: ReturnType<typeof setTimeout>;
     let butterflyTimer: ReturnType<typeof setTimeout>;
+    let hintTimer: ReturnType<typeof setTimeout>;
+    let smiles: { id: number; x: number; y: number; turn: number; size: number }[] = [];
+    let smiled = 0; // how many there have been, to tell them apart
     let frame = 0;
     let lidFrame = 0;
+    let again = false; // pressed while it blinks: once that blink is done, it blinks hello again
     let watchFrame = 0;
     let lean = 0; // degrees, to the right
     let crane = 0;
@@ -126,7 +153,10 @@
                 return;
             }
             lidFrame = 0;
-            if (up && !calm) blinkLater();
+            if (again) {
+                again = false;
+                blink(110);
+            } else if (up && !calm) blinkLater();
         };
         lidFrame = requestAnimationFrame(step);
     }
@@ -239,13 +269,59 @@
         watchFrame = requestAnimationFrame(step);
     }
 
+    /** The sparkles after ms, and again now and then, until the cat has been found. */
+    function hintLater(ms: number) {
+        clearTimeout(hintTimer);
+        if (found) return;
+        hintTimer = setTimeout(() => {
+            hinting = true;
+            hintTimer = setTimeout(() => {
+                hinting = false;
+                // With less motion, once is enough
+                const [least, most] = HINT_BETWEEN;
+                if (!calm) hintLater(least + Math.random() * (most - least));
+            }, HINT_LASTS);
+        }, ms);
+    }
+
+    function unhint() {
+        clearTimeout(hintTimer);
+        hinting = false;
+    }
+
+    /**
+     * A ":3" somewhere round its head, from a little below straight left, over the top, to a little
+     * above straight right, and on the screen.
+     */
+    function smile() {
+        const w = cat.offsetWidth;
+        const angle = Math.PI * (0.85 + Math.random() * 1.05);
+        const away = (AROUND[0] + Math.random() * (AROUND[1] - AROUND[0])) * w;
+        smiles = [
+            ...smiles,
+            {
+                id: smiled++,
+                x: Math.min(MIDDLE[0] * w + away * Math.cos(angle), spot.offsetWidth - 0.2 * w),
+                y: (MIDDLE[1] * w) / ASPECT + away * Math.sin(angle),
+                turn: (Math.random() - 0.5) * 24, // degrees
+                size: 1.3 + Math.random() * 0.5, // rem
+            },
+        ];
+    }
+
     function press() {
+        smile();
         if (up) {
-            blink(110); // held a little longer: a cat blinks hello
+            // Held a little longer: a cat blinks hello. Pressed again and again, it does not start
+            // over each time, which would be a flicker: each blink is seen through, and the next
+            // comes after it, so that it never blinks faster than a blink takes.
+            if (lidFrame) again = true;
+            else blink(110);
             return;
         }
         up = true;
         curious = false;
+        unhint();
         if (!found) {
             found = true;
             window.umami?.track("cat-found");
@@ -258,6 +334,8 @@
 
     function hide() {
         up = false;
+        unhint();
+        smiles = [];
         shut = 0;
         fly = null;
         clearTimeout(blinkTimer);
@@ -266,6 +344,7 @@
         cancelAnimationFrame(lidFrame);
         frame = 0;
         lidFrame = 0;
+        again = false;
     }
 
     // A finger on a touch screen is not something to watch: it is only there while it touches
@@ -278,8 +357,15 @@
         calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         window.addEventListener("pointermove", moved, { passive: true });
         ready = true;
+        // Fetched now, as the footer comes into view, so that it is here for the first press. If it
+        // never comes, the ":3" is in the page's own handwriting font, which is enough.
+        new FontFace("Cat smile", `url(${smileFont})`).load().then(
+            (face) => document.fonts.add(face),
+            () => {},
+        );
         observer = new IntersectionObserver(([entry]) => {
             if (!entry.isIntersecting) hide();
+            else if (!up) hintLater(HINT_FIRST);
         });
         observer.observe(spot);
     });
@@ -337,6 +423,20 @@
             ></button>
         </div>
     </div>
+    <!-- Written out, not in an #each, as the eyes are -->
+    <span class="sparkles" class:hinting aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d={STAR} /><path class="rays" d={RAYS} /></svg>
+        <svg viewBox="0 0 24 24"><path d={STAR} /><path class="rays" d={RAYS} /></svg>
+        <svg viewBox="0 0 24 24"><path d={STAR} /><path class="rays" d={RAYS} /></svg>
+    </span>
+    {#each smiles as s (s.id)}
+        <span
+            class="smile"
+            style="left: {s.x}px; top: {s.y}px; rotate: {s.turn}deg; font-size: {s.size}rem;"
+            aria-hidden="true"
+            on:animationend={() => (smiles = smiles.filter((other) => other !== s))}>:3</span
+        >
+    {/each}
     {#if fly}
         <img
             class="butterfly"
@@ -418,6 +518,148 @@
         transform-origin: 50% 60%;
     }
 
+    /* Placed from the cat's top left, as it hides, round the tip of its left ear (54% of the way
+       across the picture, 1% down), on the page beside it, where they show best: a big one up and
+       to the left of the tip, a middle one up and to the right, and a small one above */
+    .sparkles {
+        position: absolute;
+        left: 0;
+        bottom: calc(var(--h) * var(--peek));
+    }
+
+    .sparkles svg {
+        position: absolute;
+        left: calc(var(--w) * 0.4);
+        top: 0;
+        width: 18px;
+        height: 18px;
+        translate: -50% -50%;
+        fill: var(--color-accent);
+        overflow: visible;
+        opacity: 0;
+    }
+
+    .sparkles svg:nth-child(2) {
+        left: calc(var(--w) * 0.68);
+        top: calc(var(--h) * 0.02);
+        width: 12px;
+        height: 12px;
+    }
+
+    .sparkles svg:nth-child(3) {
+        left: calc(var(--w) * 0.5);
+        top: calc(var(--h) * -0.06);
+        width: 9px;
+        height: 9px;
+    }
+
+    .rays {
+        fill: none;
+        stroke: var(--color-accent);
+        stroke-width: 0.7;
+        stroke-linecap: round;
+        transform-box: fill-box;
+        transform-origin: center;
+        opacity: 0;
+    }
+
+    /* Each grows, turning a little, and goes, a fifth of a second after the one before; its rays
+       flash out as it is brightest, and are gone before it is */
+    .hinting svg {
+        animation: sparkle 0.9s ease-in-out both;
+    }
+
+    .hinting .rays {
+        animation: rays 0.9s ease-out both;
+    }
+
+    .hinting svg:nth-child(2),
+    .hinting svg:nth-child(2) .rays {
+        animation-delay: 0.2s;
+    }
+
+    .hinting svg:nth-child(3),
+    .hinting svg:nth-child(3) .rays {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes sparkle {
+        0% {
+            opacity: 1;
+            scale: 0;
+            rotate: 0deg;
+        }
+        40% {
+            scale: 1;
+        }
+        100% {
+            opacity: 1;
+            scale: 0;
+            rotate: 30deg;
+        }
+    }
+
+    @keyframes rays {
+        0%,
+        25% {
+            opacity: 0;
+            scale: 0;
+        }
+        42% {
+            opacity: 0.9;
+            scale: 1;
+        }
+        65%,
+        100% {
+            opacity: 0;
+            scale: 0.2;
+        }
+    }
+
+    /* Grows quickly where it comes, rises a little, and fades */
+    .smile {
+        position: absolute;
+        font-family: "Cat smile", cursive;
+        line-height: 1;
+        color: var(--color-accent);
+        white-space: nowrap;
+        animation: smile 1.1s ease-out both;
+    }
+
+    @keyframes smile {
+        0% {
+            opacity: 0;
+            scale: 0.6;
+            translate: -50% -40%;
+        }
+        15% {
+            opacity: 1;
+            scale: 1;
+            translate: -50% -50%;
+        }
+        65% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            translate: -50% calc(-50% - 14px);
+        }
+    }
+
+    /* With less motion, it only comes and fades where it is */
+    @keyframes smile-still {
+        0%,
+        100% {
+            opacity: 0;
+            translate: -50% -50%;
+        }
+        15%,
+        65% {
+            opacity: 1;
+            translate: -50% -50%;
+        }
+    }
+
     .butterfly {
         position: absolute;
         left: 0;
@@ -466,6 +708,10 @@
     @media (prefers-reduced-motion: reduce) {
         .cat {
             transition: none;
+        }
+
+        .smile {
+            animation-name: smile-still;
         }
     }
 </style>
