@@ -64,7 +64,7 @@
     // The sparkles: when they first come, after the footer comes into view, how long the three
     // take, one after the other, and how long from the end of one time to the next. They are CSS
     // animations, so the times are in their keyframes too.
-    const HINT_FIRST = 1200;
+    const HINT_FIRST = 200;
     const HINT_LASTS = 1400;
     const HINT_BETWEEN = [1000, 2000];
     // Each press gives back a ":3", which rises a little and fades: a CSS animation. Each comes
